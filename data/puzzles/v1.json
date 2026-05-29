@@ -1,0 +1,177 @@
+{
+  "schema_version": "1.0.1",
+  "generator_version": "0.0.0-mock",
+  "generated_at": "2026-05-29T00:00:00Z",
+  "source": "hand-authored mock fixture for web-app scaffolding (NOT generator output)",
+  "puzzles": [
+    {
+      "id": "mock-restaurant-001",
+      "size": 4,
+      "question": ["dessert", "gelato"],
+      "theme": {
+        "id": "restaurant",
+        "name": "The Corner Bistro",
+        "description": "Four diners share a row of four seats. Each ordered a different dish, drink, and dessert.",
+        "entity_label": "diner",
+        "position_label": "seat",
+        "attributes": {
+          "diner": ["Ava", "Ben", "Cora", "Dan"],
+          "dish": ["pasta", "sushi", "tacos", "salad"],
+          "drink": ["water", "cola", "coffee", "juice"],
+          "dessert": ["cake", "gelato", "pie", "fruit"]
+        },
+        "descriptors": {
+          "diner": "{value}",
+          "dish": {
+            "subject": "the diner eating {value}",
+            "predicate": "eats {value}",
+            "is_location": false
+          },
+          "drink": {
+            "subject": "the {value} drinker",
+            "predicate": "drinks {value}",
+            "is_location": false
+          },
+          "dessert": {
+            "subject": "the {value} eater",
+            "predicate": "has {value} for dessert",
+            "is_location": false
+          }
+        },
+        "question_target": ["dessert", "gelato"]
+      },
+      "clues": [
+        {
+          "raw": {
+            "type": "absolute_position",
+            "category": "diner",
+            "value": "Ava",
+            "position": 0
+          },
+          "text": "Ava sits in the first seat."
+        },
+        {
+          "raw": {
+            "type": "positive_association",
+            "category_a": "diner",
+            "value_a": "Ben",
+            "category_b": "drink",
+            "value_b": "water"
+          },
+          "text": "Ben drinks water."
+        },
+        {
+          "raw": {
+            "type": "immediate_left_of",
+            "category_a": "diner",
+            "value_a": "Ava",
+            "category_b": "diner",
+            "value_b": "Ben"
+          },
+          "text": "Ava sits immediately to the left of Ben."
+        },
+        {
+          "raw": {
+            "type": "positive_association",
+            "category_a": "dish",
+            "value_a": "tacos",
+            "category_b": "drink",
+            "value_b": "cola"
+          },
+          "text": "The diner eating tacos drinks cola."
+        },
+        {
+          "raw": {
+            "type": "adjacency",
+            "category_a": "dessert",
+            "value_a": "pie",
+            "category_b": "dessert",
+            "value_b": "cake"
+          },
+          "text": "Whoever has pie for dessert sits next to whoever has cake."
+        },
+        {
+          "raw": {
+            "type": "relative_position",
+            "category_a": "dish",
+            "value_a": "salad",
+            "category_b": "dish",
+            "value_b": "sushi"
+          },
+          "text": "Salad is served somewhere to the left of sushi."
+        },
+        {
+          "raw": {
+            "type": "negative_association",
+            "category_a": "diner",
+            "value_a": "Cora",
+            "category_b": "drink",
+            "value_b": "coffee"
+          },
+          "text": "Cora does not drink coffee."
+        },
+        {
+          "raw": {
+            "type": "positive_association",
+            "category_a": "drink",
+            "value_a": "coffee",
+            "category_b": "dessert",
+            "value_b": "gelato"
+          },
+          "text": "The coffee drinker has gelato for dessert."
+        },
+        {
+          "raw": {
+            "type": "disjunction",
+            "category_a": "diner",
+            "value_a": "Cora",
+            "options": [
+              ["dessert", "fruit"],
+              ["dessert", "cake"]
+            ]
+          },
+          "text": "Cora has either fruit or cake for dessert."
+        },
+        {
+          "raw": {
+            "type": "conditional",
+            "if_category_a": "diner",
+            "if_value_a": "Ben",
+            "if_category_b": "drink",
+            "if_value_b": "water",
+            "then_category_a": "diner",
+            "then_value_a": "Ben",
+            "then_category_b": "dish",
+            "then_value_b": "pasta"
+          },
+          "text": "If Ben drinks water, then Ben eats pasta."
+        }
+      ],
+      "solution": {
+        "theme_id": "restaurant",
+        "assignments": {
+          "diner": ["Ava", "Ben", "Cora", "Dan"],
+          "dish": ["tacos", "pasta", "salad", "sushi"],
+          "drink": ["cola", "water", "juice", "coffee"],
+          "dessert": ["pie", "cake", "fruit", "gelato"]
+        }
+      },
+      "metrics": {
+        "clue_count": 10,
+        "deduction_depth": 4,
+        "hypothesis_depth": 1,
+        "branching_factor": 1.5,
+        "clue_variety": 0.8,
+        "composite_difficulty": 3.8
+      },
+      "review": {
+        "approved": true,
+        "difficulty_rating": 4,
+        "clue_variety_rating": 4,
+        "aha_factor": 3,
+        "notes": "Hand-authored fixture for wiring the web-app data layer. Replace with the curated v1.json bank before launch.",
+        "rejection_reason": null
+      }
+    }
+  ]
+}
