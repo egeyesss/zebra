@@ -1,26 +1,41 @@
 @import "tailwindcss";
 
+/*
+ * Engineer-noir palette. Warm charcoal base, parchment text, green = "went
+ * well", red = "setback", amber = "warning". Values from web-app-design.md.
+ * Dark only by design — no light theme, no prefers-color-scheme switch.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #1a1612; /* page background, very dark warm gray */
+  --bg-elev: #221d18; /* panel / card surface */
+  --bg-elev-2: #2a241e; /* hover / focused cell */
+  --fg: #e8e2d6; /* primary text, parchment */
+  --fg-muted: #968d7e; /* secondary text, eliminated values */
+  --border: #3a322a; /* grid lines, dividers */
+  --accent-green: #6dbf6d; /* committed-correct, success, "check" */
+  --accent-red: #cf5454; /* overwrite, DNF, error */
+  --accent-amber: #d4a040; /* used/disabled check, time warning */
 }
 
+/* Expose the palette + mono stack to Tailwind as utilities (bg-bg, text-fg,
+   border-border, text-accent-green, font-mono, ...). */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-bg: var(--bg);
+  --color-bg-elev: var(--bg-elev);
+  --color-bg-elev-2: var(--bg-elev-2);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-border: var(--border);
+  --color-accent-green: var(--accent-green);
+  --color-accent-red: var(--accent-red);
+  --color-accent-amber: var(--accent-amber);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-mono:
+    var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
 }
