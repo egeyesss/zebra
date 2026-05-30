@@ -61,15 +61,7 @@ const HERO_CELLS: HeroCell[] = [
 
 function HeroGrid() {
   return (
-    <div
-      aria-hidden="true"
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(4, 122px)",
-        gridTemplateRows: "repeat(4, 72px)",
-        marginBottom: "16px",
-      }}
-    >
+    <div aria-hidden="true" className="lp-hero-grid">
       {HERO_CELLS.map((cell, i) => (
         <div
           key={i}
@@ -86,21 +78,12 @@ function HeroGrid() {
           }}
         >
           {cell.committed && (
-            <span
-              className="absolute inset-0 flex items-center justify-center text-sm text-fg"
-              style={{ whiteSpace: "nowrap" }}
-            >
-              {cell.committed}
-            </span>
+            <span className="lp-cell-text">{cell.committed}</span>
           )}
           {cell.dot && (
             <span
               className="absolute top-1.5 right-1.5 rounded-full"
-              style={{
-                width: 7,
-                height: 7,
-                background: "var(--accent-red)",
-              }}
+              style={{ width: 7, height: 7, background: "var(--accent-red)" }}
             />
           )}
         </div>
@@ -284,20 +267,7 @@ export default function LandingPage() {
         <HeroGrid />
 
         {/* Wordmark */}
-        <h1
-          className="text-fg"
-          style={{
-            fontSize: "68px",
-            fontWeight: 700,
-            letterSpacing: "0.4em",
-            textTransform: "lowercase",
-            marginRight: "-0.4em",
-            lineHeight: 1.1,
-            whiteSpace: "nowrap",
-          }}
-        >
-          z e b r a
-        </h1>
+        <h1 className="lp-wordmark">z e b r a</h1>
 
         {/* Tagline */}
         <p

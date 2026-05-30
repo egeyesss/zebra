@@ -43,3 +43,40 @@ body {
 /* Landing page button hover states */
 .btn-ghost:hover  { background: var(--bg-elev-2); }
 .btn-play:hover   { background: rgba(109, 191, 109, 0.16); }
+
+/* Landing page: fluid scaling so hero grid and wordmark fit all screen widths.
+   clamp() keeps them at their designed size on desktop while shrinking
+   proportionally to avoid horizontal overflow on phones. */
+.lp-hero-grid {
+  display: grid;
+  /* 122px on ≥580px, scales with vw in between, 76px floor for very small phones */
+  grid-template-columns: repeat(4, clamp(76px, 21vw, 122px));
+  grid-template-rows: repeat(4, clamp(52px, 14vw, 72px));
+  margin-bottom: 16px;
+}
+
+.lp-cell-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* scale text with cells so "Englishman" doesn't overflow its cell */
+  font-size: clamp(9px, 2.4vw, 14px);
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+.lp-wordmark {
+  /* 68px on desktop, 36px floor — sized so "z e b r a" clears the 24px side
+     padding at the narrowest iPhone viewport (375px). */
+  font-size: clamp(36px, 9.5vw, 68px);
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  /* pull back the trailing letter-spacing so the word looks optically centred */
+  margin-right: -0.4em;
+  text-transform: lowercase;
+  line-height: 1.1;
+  white-space: nowrap;
+  color: var(--fg);
+}
