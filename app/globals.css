@@ -40,6 +40,10 @@ body {
   font-family: var(--font-mono);
 }
 
+/* Prevent iOS 300ms tap delay and gesture cancellation on all buttons.
+   Without this, Safari may swallow or delay click events on <button> elements. */
+button { touch-action: manipulation; }
+
 /* Landing page button hover states */
 .btn-ghost:hover  { background: var(--bg-elev-2); }
 .btn-play:hover   { background: rgba(109, 191, 109, 0.16); }

@@ -281,12 +281,16 @@ export default function LandingPage() {
           </b>
         </p>
 
-        {/* Mode selector */}
+        {/* Mode selector
+            overflow-hidden is intentionally absent: on iOS WebKit, combining
+            overflow:hidden with border-radius clips the touch hit-test to the
+            rectangular bounding box, so taps in the rounded corners miss. We
+            round each button individually instead. */}
         <div
-          className="mt-9 flex overflow-hidden rounded-full"
-          style={{ boxShadow: "inset 0 0 0 1px var(--border)" }}
+          className="mt-9 mx-4 flex"
+          style={{ boxShadow: "inset 0 0 0 1px var(--border)", borderRadius: "9999px" }}
         >
-          {(["coffee", "deep"] as const).map((m) => (
+          {(["coffee", "deep"] as const).map((m, idx) => (
             <button
               key={m}
               onClick={() => setMode(m)}
@@ -296,11 +300,15 @@ export default function LandingPage() {
                 padding: "13px 28px",
                 background: mode === m ? "var(--bg-elev-2)" : "transparent",
                 color: mode === m ? "var(--fg)" : "var(--fg-muted)",
-                cursor: mode === m ? "default" : "pointer",
+                // Always pointer — iOS Safari can suppress clicks on cursor:default elements
+                cursor: "pointer",
                 border: "none",
                 outline: "none",
                 whiteSpace: "nowrap",
                 transition: "background .15s, color .15s",
+                // Individual border-radius replaces the parent overflow-hidden
+                borderRadius: idx === 0 ? "9999px 0 0 9999px" : "0 9999px 9999px 0",
+                flex: 1,
               }}
             >
               {m === "coffee" ? "☕ Coffee · 4 × 4" : "🌊 Deep · 5 × 5"}
@@ -308,9 +316,9 @@ export default function LandingPage() {
           ))}
         </div>
 
-        {/* Action buttons */}
+        {/* Action buttons — mx-4 keeps them off the screen edges */}
         <div
-          className="mt-6 flex flex-wrap justify-center"
+          className="mt-6 mx-4 flex flex-wrap justify-center"
           style={{ gap: "14px" }}
         >
           <button
