@@ -1,9 +1,737 @@
 {
   "schema_version": "1.0.1",
-  "generator_version": "0.0.0-mock",
-  "generated_at": "2026-05-29T00:00:00Z",
-  "source": "hand-authored mock fixture for web-app scaffolding (NOT generator output)",
+  "generator_version": "0.0.0-handcrafted",
+  "generated_at": "2026-05-30T00:00:00Z",
+  "source": "hand-crafted dev fixtures — replace with generator output before launch",
   "puzzles": [
+    {
+      "id": "library-2026-001",
+      "size": 4,
+      "question": ["beverage", "latte"],
+      "theme": {
+        "id": "library",
+        "name": "The Reading Room",
+        "description": "Four readers occupy tables in a row. Each has a favourite genre, a hot drink, and a snack.",
+        "entity_label": "reader",
+        "position_label": "table",
+        "attributes": {
+          "reader":   ["Emma", "Fred", "Grace", "Hank"],
+          "genre":    ["mystery", "sci-fi", "history", "romance"],
+          "beverage": ["tea", "espresso", "latte", "juice"],
+          "snack":    ["cookie", "muffin", "cake", "brownie"]
+        },
+        "descriptors": {
+          "reader": "{value}",
+          "genre": {
+            "subject": "the {value} reader",
+            "predicate": "reads {value}",
+            "is_location": false
+          },
+          "beverage": {
+            "subject": "the {value} drinker",
+            "predicate": "drinks {value}",
+            "is_location": false
+          },
+          "snack": {
+            "subject": "the {value} eater",
+            "predicate": "has {value}",
+            "is_location": false
+          }
+        },
+        "question_target": ["beverage", "latte"]
+      },
+      "clues": [
+        {
+          "raw": { "type": "absolute_position", "category": "reader", "value": "Emma", "position": 0 },
+          "text": "Emma sits at the first table."
+        },
+        {
+          "raw": { "type": "immediate_left_of", "category_a": "reader", "value_a": "Emma", "category_b": "reader", "value_b": "Fred" },
+          "text": "Emma sits immediately to the left of Fred."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "reader", "value_a": "Fred", "category_b": "genre", "value_b": "sci-fi" },
+          "text": "Fred reads sci-fi."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "genre", "value_a": "mystery", "category_b": "beverage", "value_b": "tea" },
+          "text": "The mystery reader drinks tea."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "reader", "value_a": "Grace", "category_b": "genre", "value_b": "history" },
+          "text": "Grace reads history."
+        },
+        {
+          "raw": { "type": "relative_position", "category_a": "genre", "value_a": "history", "category_b": "genre", "value_b": "romance" },
+          "text": "History is shelved somewhere to the left of romance."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "reader", "value_a": "Hank", "category_b": "beverage", "value_b": "juice" },
+          "text": "Hank drinks juice."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "beverage", "value_a": "latte", "category_b": "snack", "value_b": "cake" },
+          "text": "The latte drinker has cake."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "snack", "value_a": "muffin", "category_b": "beverage", "value_b": "espresso" },
+          "text": "The muffin eater drinks espresso."
+        },
+        {
+          "raw": { "type": "negative_association", "category_a": "reader", "value_a": "Grace", "category_b": "snack", "value_b": "muffin" },
+          "text": "Grace does not eat a muffin."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "beverage", "value_a": "tea", "category_b": "snack", "value_b": "cookie" },
+          "text": "The tea drinker has a cookie."
+        }
+      ],
+      "solution": {
+        "theme_id": "library",
+        "assignments": {
+          "reader":   ["Emma",    "Fred",     "Grace",   "Hank"],
+          "genre":    ["mystery", "sci-fi",   "history", "romance"],
+          "beverage": ["tea",     "espresso", "latte",   "juice"],
+          "snack":    ["cookie",  "muffin",   "cake",    "brownie"]
+        }
+      },
+      "metrics": {
+        "clue_count": 11,
+        "deduction_depth": 4,
+        "hypothesis_depth": 0,
+        "branching_factor": 1.2,
+        "clue_variety": 0.7,
+        "composite_difficulty": 3.2
+      },
+      "review": {
+        "approved": true,
+        "difficulty_rating": 3,
+        "clue_variety_rating": 3,
+        "aha_factor": 3,
+        "notes": "Hand-crafted dev fixture.",
+        "rejection_reason": null
+      }
+    },
+
+    {
+      "id": "einstein-2026-001",
+      "size": 5,
+      "question": ["pet", "zebra"],
+      "theme": {
+        "id": "einstein",
+        "name": "The Zebra Puzzle",
+        "description": "Five neighbours live in a row of five houses. Each has a unique nationality, house colour, preferred drink, cigarette brand, and pet.",
+        "entity_label": "resident",
+        "position_label": "house",
+        "attributes": {
+          "nationality": ["Norwegian", "Dane", "Englishman", "German", "Swede"],
+          "color":       ["yellow", "blue", "red", "green", "white"],
+          "drink":       ["water", "tea", "milk", "coffee", "beer"],
+          "cigarette":   ["Dunhill", "Blends", "Pall-Mall", "Prince", "BlueMaster"],
+          "pet":         ["cats", "horses", "birds", "zebra", "dogs"]
+        },
+        "descriptors": {
+          "nationality": "{value}",
+          "color": {
+            "subject": "the {value} house",
+            "predicate": "has a {value} exterior",
+            "is_location": true
+          },
+          "drink": {
+            "subject": "the {value} drinker",
+            "predicate": "drinks {value}",
+            "is_location": false
+          },
+          "cigarette": {
+            "subject": "the {value} smoker",
+            "predicate": "smokes {value}",
+            "is_location": false
+          },
+          "pet": {
+            "subject": "the {value} owner",
+            "predicate": "keeps {value}",
+            "is_location": false
+          }
+        },
+        "question_target": ["pet", "zebra"]
+      },
+      "clues": [
+        {
+          "raw": { "type": "positive_association", "category_a": "nationality", "value_a": "Englishman", "category_b": "color", "value_b": "red" },
+          "text": "The Englishman lives in the red house."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "nationality", "value_a": "Swede", "category_b": "pet", "value_b": "dogs" },
+          "text": "The Swede keeps dogs."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "nationality", "value_a": "Dane", "category_b": "drink", "value_b": "tea" },
+          "text": "The Dane drinks tea."
+        },
+        {
+          "raw": { "type": "immediate_left_of", "category_a": "color", "value_a": "green", "category_b": "color", "value_b": "white" },
+          "text": "The green house is immediately to the left of the white house."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "color", "value_a": "green", "category_b": "drink", "value_b": "coffee" },
+          "text": "The green house owner drinks coffee."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "cigarette", "value_a": "Pall-Mall", "category_b": "pet", "value_b": "birds" },
+          "text": "The Pall-Mall smoker keeps birds."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "color", "value_a": "yellow", "category_b": "cigarette", "value_b": "Dunhill" },
+          "text": "The yellow house owner smokes Dunhill."
+        },
+        {
+          "raw": { "type": "absolute_position", "category": "drink", "value": "milk", "position": 2 },
+          "text": "The person in the middle house drinks milk."
+        },
+        {
+          "raw": { "type": "absolute_position", "category": "nationality", "value": "Norwegian", "position": 0 },
+          "text": "The Norwegian lives in the first house."
+        },
+        {
+          "raw": { "type": "adjacency", "category_a": "cigarette", "value_a": "Blends", "category_b": "pet", "value_b": "cats" },
+          "text": "The Blends smoker lives next to the cat owner."
+        },
+        {
+          "raw": { "type": "adjacency", "category_a": "pet", "value_a": "horses", "category_b": "cigarette", "value_b": "Dunhill" },
+          "text": "The horse keeper lives next to the Dunhill smoker."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "cigarette", "value_a": "BlueMaster", "category_b": "drink", "value_b": "beer" },
+          "text": "The BlueMaster smoker drinks beer."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "nationality", "value_a": "German", "category_b": "cigarette", "value_b": "Prince" },
+          "text": "The German smokes Prince."
+        },
+        {
+          "raw": { "type": "adjacency", "category_a": "nationality", "value_a": "Norwegian", "category_b": "color", "value_b": "blue" },
+          "text": "The Norwegian lives next to the blue house."
+        },
+        {
+          "raw": { "type": "adjacency", "category_a": "cigarette", "value_a": "Blends", "category_b": "drink", "value_b": "water" },
+          "text": "The Blends smoker has a neighbour who drinks water."
+        }
+      ],
+      "solution": {
+        "theme_id": "einstein",
+        "assignments": {
+          "nationality": ["Norwegian",  "Dane",    "Englishman", "German",  "Swede"],
+          "color":       ["yellow",     "blue",    "red",        "green",   "white"],
+          "drink":       ["water",      "tea",     "milk",       "coffee",  "beer"],
+          "cigarette":   ["Dunhill",    "Blends",  "Pall-Mall",  "Prince",  "BlueMaster"],
+          "pet":         ["cats",       "horses",  "birds",      "zebra",   "dogs"]
+        }
+      },
+      "metrics": {
+        "clue_count": 15,
+        "deduction_depth": 7,
+        "hypothesis_depth": 1,
+        "branching_factor": 1.8,
+        "clue_variety": 0.8,
+        "composite_difficulty": 6.5
+      },
+      "review": {
+        "approved": true,
+        "difficulty_rating": 7,
+        "clue_variety_rating": 4,
+        "aha_factor": 5,
+        "notes": "The classic Einstein/Zebra puzzle. Adapted with zebra as a pet value.",
+        "rejection_reason": null
+      }
+    },
+
+    {
+      "id": "museum-2026-001",
+      "size": 4,
+      "question": ["souvenir", "keychain"],
+      "theme": {
+        "id": "museum",
+        "name": "The Grand Museum",
+        "description": "Four visitors tour four exhibits in a row. Each came from a different city and bought a different souvenir.",
+        "entity_label": "visitor",
+        "position_label": "exhibit",
+        "attributes": {
+          "visitor":  ["Alice", "Bruno", "Clara", "Diego"],
+          "exhibit":  ["paintings", "sculptures", "fossils", "textiles"],
+          "city":     ["Tokyo", "Berlin", "Cairo", "Sydney"],
+          "souvenir": ["postcard", "magnet", "keychain", "print"]
+        },
+        "descriptors": {
+          "visitor": "{value}",
+          "exhibit": {
+            "subject": "the visitor at the {value}",
+            "predicate": "views {value}",
+            "is_location": false
+          },
+          "city": {
+            "subject": "the {value} visitor",
+            "predicate": "is from {value}",
+            "is_location": false
+          },
+          "souvenir": {
+            "subject": "the {value} buyer",
+            "predicate": "bought a {value}",
+            "is_location": false
+          }
+        },
+        "question_target": ["souvenir", "keychain"]
+      },
+      "clues": [
+        {
+          "raw": { "type": "absolute_position", "category": "visitor", "value": "Alice", "position": 0 },
+          "text": "Alice stands at the first display."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "visitor", "value_a": "Bruno", "category_b": "exhibit", "value_b": "sculptures" },
+          "text": "Bruno is viewing the sculptures."
+        },
+        {
+          "raw": { "type": "immediate_left_of", "category_a": "visitor", "value_a": "Alice", "category_b": "visitor", "value_b": "Bruno" },
+          "text": "Alice is immediately to the left of Bruno."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "exhibit", "value_a": "fossils", "category_b": "city", "value_b": "Cairo" },
+          "text": "The fossil display was loaned from Cairo."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "visitor", "value_a": "Clara", "category_b": "city", "value_b": "Cairo" },
+          "text": "Clara is from Cairo."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "city", "value_a": "Tokyo", "category_b": "souvenir", "value_b": "postcard" },
+          "text": "The Tokyo visitor bought a postcard."
+        },
+        {
+          "raw": { "type": "relative_position", "category_a": "exhibit", "value_a": "fossils", "category_b": "exhibit", "value_b": "textiles" },
+          "text": "The fossil display is somewhere to the left of the textiles exhibit."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "visitor", "value_a": "Diego", "category_b": "souvenir", "value_b": "print" },
+          "text": "Diego bought a print."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "exhibit", "value_a": "sculptures", "category_b": "souvenir", "value_b": "magnet" },
+          "text": "The sculptures visitor bought a magnet."
+        },
+        {
+          "raw": { "type": "negative_association", "category_a": "visitor", "value_a": "Clara", "category_b": "souvenir", "value_b": "magnet" },
+          "text": "Clara did not buy a magnet."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "visitor", "value_a": "Diego", "category_b": "city", "value_b": "Sydney" },
+          "text": "Diego is from Sydney."
+        }
+      ],
+      "solution": {
+        "theme_id": "museum",
+        "assignments": {
+          "visitor":  ["Alice",    "Bruno",       "Clara",   "Diego"],
+          "exhibit":  ["paintings","sculptures",  "fossils", "textiles"],
+          "city":     ["Tokyo",    "Berlin",      "Cairo",   "Sydney"],
+          "souvenir": ["postcard", "magnet",      "keychain","print"]
+        }
+      },
+      "metrics": {
+        "clue_count": 11,
+        "deduction_depth": 4,
+        "hypothesis_depth": 0,
+        "branching_factor": 1.3,
+        "clue_variety": 0.7,
+        "composite_difficulty": 3.4
+      },
+      "review": {
+        "approved": true,
+        "difficulty_rating": 3,
+        "clue_variety_rating": 3,
+        "aha_factor": 3,
+        "notes": "Hand-crafted dev fixture.",
+        "rejection_reason": null
+      }
+    },
+
+    {
+      "id": "train-2026-001",
+      "size": 5,
+      "question": ["city", "Athens"],
+      "theme": {
+        "id": "train",
+        "name": "The Night Express",
+        "description": "Five passengers occupy cars 1–5 on an overnight train. Each is headed to a different city, travels a different class, carries different luggage, and passes the journey differently.",
+        "entity_label": "passenger",
+        "position_label": "car",
+        "attributes": {
+          "passenger": ["Aria", "Bram", "Cleo", "Drew", "Elsa"],
+          "city":      ["Paris", "London", "Madrid", "Rome", "Athens"],
+          "class":     ["first", "business", "economy", "premium", "basic"],
+          "luggage":   ["briefcase", "backpack", "suitcase", "trunk", "none"],
+          "hobby":     ["reading", "sketching", "napping", "gaming", "knitting"]
+        },
+        "descriptors": {
+          "passenger": "{value}",
+          "city": {
+            "subject": "the {value}-bound passenger",
+            "predicate": "is heading to {value}",
+            "is_location": false
+          },
+          "class": {
+            "subject": "the {value} class passenger",
+            "predicate": "travels {value} class",
+            "is_location": false
+          },
+          "luggage": {
+            "subject": "the passenger with {value}",
+            "predicate": "carries {value}",
+            "is_location": false
+          },
+          "hobby": {
+            "subject": "the {value} passenger",
+            "predicate": "spends the journey {value}",
+            "is_location": false
+          }
+        },
+        "question_target": ["city", "Athens"]
+      },
+      "clues": [
+        {
+          "raw": { "type": "absolute_position", "category": "passenger", "value": "Aria", "position": 0 },
+          "text": "Aria is in car 1."
+        },
+        {
+          "raw": { "type": "absolute_position", "category": "passenger", "value": "Elsa", "position": 4 },
+          "text": "Elsa is in car 5."
+        },
+        {
+          "raw": { "type": "immediate_left_of", "category_a": "passenger", "value_a": "Aria", "category_b": "passenger", "value_b": "Bram" },
+          "text": "Aria is immediately to the left of Bram."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "passenger", "value_a": "Cleo", "category_b": "city", "value_b": "Madrid" },
+          "text": "Cleo is heading to Madrid."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "passenger", "value_a": "Drew", "category_b": "city", "value_b": "Rome" },
+          "text": "Drew is heading to Rome."
+        },
+        {
+          "raw": { "type": "relative_position", "category_a": "city", "value_a": "Madrid", "category_b": "city", "value_b": "Rome" },
+          "text": "The Madrid-bound car is numbered lower than the Rome-bound car."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "passenger", "value_a": "Aria", "category_b": "class", "value_b": "first" },
+          "text": "Aria travels first class."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "passenger", "value_a": "Bram", "category_b": "class", "value_b": "business" },
+          "text": "Bram travels business class."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "passenger", "value_a": "Drew", "category_b": "class", "value_b": "premium" },
+          "text": "Drew travels premium class."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "passenger", "value_a": "Elsa", "category_b": "class", "value_b": "basic" },
+          "text": "Elsa travels basic class."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "class", "value_a": "first", "category_b": "luggage", "value_b": "briefcase" },
+          "text": "First-class passengers carry a briefcase."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "class", "value_a": "basic", "category_b": "hobby", "value_b": "knitting" },
+          "text": "Basic class passengers spend the journey knitting."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "class", "value_a": "business", "category_b": "hobby", "value_b": "sketching" },
+          "text": "Business class passengers enjoy sketching."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "class", "value_a": "economy", "category_b": "hobby", "value_b": "napping" },
+          "text": "Economy class passengers sleep through the journey."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "class", "value_a": "premium", "category_b": "hobby", "value_b": "gaming" },
+          "text": "Premium class passengers play games."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "class", "value_a": "economy", "category_b": "luggage", "value_b": "suitcase" },
+          "text": "Economy class passengers bring a suitcase."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "class", "value_a": "premium", "category_b": "luggage", "value_b": "trunk" },
+          "text": "Premium class passengers bring a trunk."
+        },
+        {
+          "raw": { "type": "relative_position", "category_a": "city", "value_a": "Paris", "category_b": "city", "value_b": "London" },
+          "text": "Paris is earlier on the route than London."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "city", "value_a": "London", "category_b": "luggage", "value_b": "backpack" },
+          "text": "The London-bound passenger carries a backpack."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "passenger", "value_a": "Aria", "category_b": "city", "value_b": "Paris" },
+          "text": "Aria is heading to Paris."
+        }
+      ],
+      "solution": {
+        "theme_id": "train",
+        "assignments": {
+          "passenger": ["Aria",       "Bram",      "Cleo",     "Drew",    "Elsa"],
+          "city":      ["Paris",      "London",    "Madrid",   "Rome",    "Athens"],
+          "class":     ["first",      "business",  "economy",  "premium", "basic"],
+          "luggage":   ["briefcase",  "backpack",  "suitcase", "trunk",   "none"],
+          "hobby":     ["reading",    "sketching", "napping",  "gaming",  "knitting"]
+        }
+      },
+      "metrics": {
+        "clue_count": 20,
+        "deduction_depth": 5,
+        "hypothesis_depth": 0,
+        "branching_factor": 1.0,
+        "clue_variety": 0.5,
+        "composite_difficulty": 4.0
+      },
+      "review": {
+        "approved": true,
+        "difficulty_rating": 4,
+        "clue_variety_rating": 2,
+        "aha_factor": 2,
+        "notes": "Hand-crafted dev fixture. Clue-heavy by design — straightforward deduction chain.",
+        "rejection_reason": null
+      }
+    },
+
+    {
+      "id": "garden-2026-001",
+      "size": 4,
+      "question": ["time", "afternoon"],
+      "theme": {
+        "id": "garden",
+        "name": "The Allotment",
+        "description": "Four gardeners tend four plots in a row. Each grows a different plant, uses a different tool, and works at a different time of day.",
+        "entity_label": "gardener",
+        "position_label": "plot",
+        "attributes": {
+          "gardener": ["Ian", "Jess", "Kim", "Leo"],
+          "plant":    ["roses", "tulips", "herbs", "ferns"],
+          "tool":     ["trowel", "shears", "hoe", "rake"],
+          "time":     ["morning", "noon", "afternoon", "evening"]
+        },
+        "descriptors": {
+          "gardener": "{value}",
+          "plant": {
+            "subject": "the {value} grower",
+            "predicate": "grows {value}",
+            "is_location": false
+          },
+          "tool": {
+            "subject": "the {value} user",
+            "predicate": "uses a {value}",
+            "is_location": false
+          },
+          "time": {
+            "subject": "the {value} gardener",
+            "predicate": "works in the {value}",
+            "is_location": false
+          }
+        },
+        "question_target": ["time", "afternoon"]
+      },
+      "clues": [
+        {
+          "raw": { "type": "absolute_position", "category": "gardener", "value": "Ian", "position": 0 },
+          "text": "Ian tends the first plot."
+        },
+        {
+          "raw": { "type": "immediate_left_of", "category_a": "gardener", "value_a": "Ian", "category_b": "gardener", "value_b": "Jess" },
+          "text": "Ian's plot is immediately to the left of Jess's."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "gardener", "value_a": "Jess", "category_b": "plant", "value_b": "tulips" },
+          "text": "Jess grows tulips."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "plant", "value_a": "roses", "category_b": "tool", "value_b": "trowel" },
+          "text": "Roses require a trowel."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "gardener", "value_a": "Kim", "category_b": "tool", "value_b": "hoe" },
+          "text": "Kim uses a hoe."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "plant", "value_a": "herbs", "category_b": "time", "value_b": "afternoon" },
+          "text": "The herb garden is tended in the afternoon."
+        },
+        {
+          "raw": { "type": "relative_position", "category_a": "plant", "value_a": "herbs", "category_b": "plant", "value_b": "ferns" },
+          "text": "Herbs are planted somewhere to the left of ferns."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "gardener", "value_a": "Leo", "category_b": "time", "value_b": "evening" },
+          "text": "Leo works in the evening."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "tool", "value_a": "shears", "category_b": "plant", "value_b": "tulips" },
+          "text": "Shears are used for tulips."
+        },
+        {
+          "raw": { "type": "negative_association", "category_a": "gardener", "value_a": "Kim", "category_b": "time", "value_b": "morning" },
+          "text": "Kim does not garden in the morning."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "gardener", "value_a": "Ian", "category_b": "plant", "value_b": "roses" },
+          "text": "Ian grows roses."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "gardener", "value_a": "Ian", "category_b": "time", "value_b": "morning" },
+          "text": "Ian gardens in the morning."
+        }
+      ],
+      "solution": {
+        "theme_id": "garden",
+        "assignments": {
+          "gardener": ["Ian",     "Jess",   "Kim",       "Leo"],
+          "plant":    ["roses",   "tulips", "herbs",     "ferns"],
+          "tool":     ["trowel",  "shears", "hoe",       "rake"],
+          "time":     ["morning", "noon",   "afternoon", "evening"]
+        }
+      },
+      "metrics": {
+        "clue_count": 12,
+        "deduction_depth": 4,
+        "hypothesis_depth": 0,
+        "branching_factor": 1.1,
+        "clue_variety": 0.7,
+        "composite_difficulty": 3.0
+      },
+      "review": {
+        "approved": true,
+        "difficulty_rating": 3,
+        "clue_variety_rating": 3,
+        "aha_factor": 2,
+        "notes": "Hand-crafted dev fixture.",
+        "rejection_reason": null
+      }
+    },
+
+    {
+      "id": "astronomy-2026-001",
+      "size": 4,
+      "question": ["telescope", "8-inch"],
+      "theme": {
+        "id": "astronomy",
+        "name": "The Observatory",
+        "description": "Four astronomers occupy four stations in a row. Each observes a different planet, uses a different telescope, and works a different night session.",
+        "entity_label": "astronomer",
+        "position_label": "station",
+        "attributes": {
+          "astronomer": ["Noah", "Olivia", "Paul", "Quinn"],
+          "planet":     ["Mercury", "Venus", "Mars", "Jupiter"],
+          "telescope":  ["4-inch", "6-inch", "8-inch", "12-inch"],
+          "session":    ["dusk", "midnight", "dawn", "predawn"]
+        },
+        "descriptors": {
+          "astronomer": "{value}",
+          "planet": {
+            "subject": "the {value} observer",
+            "predicate": "observes {value}",
+            "is_location": false
+          },
+          "telescope": {
+            "subject": "the {value} telescope user",
+            "predicate": "uses the {value} telescope",
+            "is_location": false
+          },
+          "session": {
+            "subject": "the {value} session astronomer",
+            "predicate": "works the {value} session",
+            "is_location": false
+          }
+        },
+        "question_target": ["telescope", "8-inch"]
+      },
+      "clues": [
+        {
+          "raw": { "type": "absolute_position", "category": "astronomer", "value": "Noah", "position": 0 },
+          "text": "Noah uses the first station."
+        },
+        {
+          "raw": { "type": "immediate_left_of", "category_a": "astronomer", "value_a": "Noah", "category_b": "astronomer", "value_b": "Olivia" },
+          "text": "Noah is immediately to the left of Olivia."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "astronomer", "value_a": "Olivia", "category_b": "planet", "value_b": "Venus" },
+          "text": "Olivia observes Venus."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "planet", "value_a": "Mercury", "category_b": "telescope", "value_b": "4-inch" },
+          "text": "Mercury is observed with the 4-inch telescope."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "astronomer", "value_a": "Paul", "category_b": "session", "value_b": "dawn" },
+          "text": "Paul prefers the dawn session."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "planet", "value_a": "Jupiter", "category_b": "telescope", "value_b": "12-inch" },
+          "text": "Jupiter requires the 12-inch telescope."
+        },
+        {
+          "raw": { "type": "relative_position", "category_a": "planet", "value_a": "Mars", "category_b": "planet", "value_b": "Jupiter" },
+          "text": "Mars is observed from a station to the left of Jupiter's."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "astronomer", "value_a": "Quinn", "category_b": "planet", "value_b": "Jupiter" },
+          "text": "Quinn tracks Jupiter."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "telescope", "value_a": "6-inch", "category_b": "session", "value_b": "midnight" },
+          "text": "The 6-inch telescope is used at midnight."
+        },
+        {
+          "raw": { "type": "absolute_position", "category": "astronomer", "value": "Paul", "position": 2 },
+          "text": "Paul uses the third station."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "astronomer", "value_a": "Noah", "category_b": "session", "value_b": "dusk" },
+          "text": "Noah observes at dusk."
+        },
+        {
+          "raw": { "type": "positive_association", "category_a": "astronomer", "value_a": "Noah", "category_b": "planet", "value_b": "Mercury" },
+          "text": "Noah observes Mercury."
+        }
+      ],
+      "solution": {
+        "theme_id": "astronomy",
+        "assignments": {
+          "astronomer": ["Noah",    "Olivia",   "Paul",  "Quinn"],
+          "planet":     ["Mercury", "Venus",    "Mars",  "Jupiter"],
+          "telescope":  ["4-inch",  "6-inch",   "8-inch","12-inch"],
+          "session":    ["dusk",    "midnight", "dawn",  "predawn"]
+        }
+      },
+      "metrics": {
+        "clue_count": 12,
+        "deduction_depth": 4,
+        "hypothesis_depth": 0,
+        "branching_factor": 1.2,
+        "clue_variety": 0.6,
+        "composite_difficulty": 3.5
+      },
+      "review": {
+        "approved": true,
+        "difficulty_rating": 4,
+        "clue_variety_rating": 3,
+        "aha_factor": 3,
+        "notes": "Hand-crafted dev fixture.",
+        "rejection_reason": null
+      }
+    },
+
     {
       "id": "mock-restaurant-001",
       "size": 4,
@@ -15,9 +743,9 @@
         "entity_label": "diner",
         "position_label": "seat",
         "attributes": {
-          "diner": ["Ava", "Ben", "Cora", "Dan"],
-          "dish": ["pasta", "sushi", "tacos", "salad"],
-          "drink": ["water", "cola", "coffee", "juice"],
+          "diner":   ["Ava", "Ben", "Cora", "Dan"],
+          "dish":    ["pasta", "sushi", "tacos", "salad"],
+          "drink":   ["water", "cola", "coffee", "juice"],
           "dessert": ["cake", "gelato", "pie", "fruit"]
         },
         "descriptors": {
@@ -42,82 +770,35 @@
       },
       "clues": [
         {
-          "raw": {
-            "type": "absolute_position",
-            "category": "diner",
-            "value": "Ava",
-            "position": 0
-          },
+          "raw": { "type": "absolute_position", "category": "diner", "value": "Ava", "position": 0 },
           "text": "Ava sits in the first seat."
         },
         {
-          "raw": {
-            "type": "positive_association",
-            "category_a": "diner",
-            "value_a": "Ben",
-            "category_b": "drink",
-            "value_b": "water"
-          },
+          "raw": { "type": "positive_association", "category_a": "diner", "value_a": "Ben", "category_b": "drink", "value_b": "water" },
           "text": "Ben drinks water."
         },
         {
-          "raw": {
-            "type": "immediate_left_of",
-            "category_a": "diner",
-            "value_a": "Ava",
-            "category_b": "diner",
-            "value_b": "Ben"
-          },
+          "raw": { "type": "immediate_left_of", "category_a": "diner", "value_a": "Ava", "category_b": "diner", "value_b": "Ben" },
           "text": "Ava sits immediately to the left of Ben."
         },
         {
-          "raw": {
-            "type": "positive_association",
-            "category_a": "dish",
-            "value_a": "tacos",
-            "category_b": "drink",
-            "value_b": "cola"
-          },
+          "raw": { "type": "positive_association", "category_a": "dish", "value_a": "tacos", "category_b": "drink", "value_b": "cola" },
           "text": "The diner eating tacos drinks cola."
         },
         {
-          "raw": {
-            "type": "adjacency",
-            "category_a": "dessert",
-            "value_a": "pie",
-            "category_b": "dessert",
-            "value_b": "cake"
-          },
+          "raw": { "type": "adjacency", "category_a": "dessert", "value_a": "pie", "category_b": "dessert", "value_b": "cake" },
           "text": "Whoever has pie for dessert sits next to whoever has cake."
         },
         {
-          "raw": {
-            "type": "relative_position",
-            "category_a": "dish",
-            "value_a": "salad",
-            "category_b": "dish",
-            "value_b": "sushi"
-          },
+          "raw": { "type": "relative_position", "category_a": "dish", "value_a": "salad", "category_b": "dish", "value_b": "sushi" },
           "text": "Salad is served somewhere to the left of sushi."
         },
         {
-          "raw": {
-            "type": "negative_association",
-            "category_a": "diner",
-            "value_a": "Cora",
-            "category_b": "drink",
-            "value_b": "coffee"
-          },
+          "raw": { "type": "negative_association", "category_a": "diner", "value_a": "Cora", "category_b": "drink", "value_b": "coffee" },
           "text": "Cora does not drink coffee."
         },
         {
-          "raw": {
-            "type": "positive_association",
-            "category_a": "drink",
-            "value_a": "coffee",
-            "category_b": "dessert",
-            "value_b": "gelato"
-          },
+          "raw": { "type": "positive_association", "category_a": "drink", "value_a": "coffee", "category_b": "dessert", "value_b": "gelato" },
           "text": "The coffee drinker has gelato for dessert."
         },
         {
@@ -125,24 +806,17 @@
             "type": "disjunction",
             "category_a": "diner",
             "value_a": "Cora",
-            "options": [
-              ["dessert", "fruit"],
-              ["dessert", "cake"]
-            ]
+            "options": [["dessert", "fruit"], ["dessert", "cake"]]
           },
           "text": "Cora has either fruit or cake for dessert."
         },
         {
           "raw": {
             "type": "conditional",
-            "if_category_a": "diner",
-            "if_value_a": "Ben",
-            "if_category_b": "drink",
-            "if_value_b": "water",
-            "then_category_a": "diner",
-            "then_value_a": "Ben",
-            "then_category_b": "dish",
-            "then_value_b": "pasta"
+            "if_category_a": "diner", "if_value_a": "Ben",
+            "if_category_b": "drink", "if_value_b": "water",
+            "then_category_a": "diner", "then_value_a": "Ben",
+            "then_category_b": "dish",  "then_value_b": "pasta"
           },
           "text": "If Ben drinks water, then Ben eats pasta."
         }
@@ -150,10 +824,10 @@
       "solution": {
         "theme_id": "restaurant",
         "assignments": {
-          "diner": ["Ava", "Ben", "Cora", "Dan"],
-          "dish": ["tacos", "pasta", "salad", "sushi"],
-          "drink": ["cola", "water", "juice", "coffee"],
-          "dessert": ["pie", "cake", "fruit", "gelato"]
+          "diner":   ["Ava",   "Ben",   "Cora",  "Dan"],
+          "dish":    ["tacos", "pasta", "salad", "sushi"],
+          "drink":   ["cola",  "water", "juice", "coffee"],
+          "dessert": ["pie",   "cake",  "fruit", "gelato"]
         }
       },
       "metrics": {
@@ -169,7 +843,7 @@
         "difficulty_rating": 4,
         "clue_variety_rating": 4,
         "aha_factor": 3,
-        "notes": "Hand-authored fixture for wiring the web-app data layer. Replace with the curated v1.json bank before launch.",
+        "notes": "Original hand-authored fixture. Kept in pool as day-7 puzzle.",
         "rejection_reason": null
       }
     }

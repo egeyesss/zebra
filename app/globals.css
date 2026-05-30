@@ -39,3 +39,7 @@ body {
   color: var(--fg);
   font-family: var(--font-mono);
 }
+
+/* Landing page button hover states */
+.btn-ghost:hover  { background: var(--bg-elev-2); }
+.btn-play:hover   { background: rgba(109, 191, 109, 0.16); }
