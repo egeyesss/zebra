@@ -25,9 +25,22 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
-export function CountdownSection({ mode }: { mode: "coffee" | "deep" }) {
+export function CountdownSection({
+  initialMode,
+}: {
+  initialMode: "coffee" | "deep";
+}) {
+  const [mode, setMode] = useState(initialMode);
   const [date, setDate] = useState("");
   const [countdown, setCountdown] = useState("");
+
+  // Sync with ModeSelector's custom event so the label updates without a reload
+  useEffect(() => {
+    const handler = (e: Event) =>
+      setMode((e as CustomEvent<"coffee" | "deep">).detail);
+    window.addEventListener("zebra:mode", handler);
+    return () => window.removeEventListener("zebra:mode", handler);
+  }, []);
 
   useEffect(() => {
     function update() {

@@ -14,6 +14,7 @@
 import { Suspense } from "react";
 
 import { CountdownSection } from "@/components/CountdownSection";
+import { ModeSelector } from "@/components/ModeSelector";
 
 // ---------------------------------------------------------------------------
 // Decorative mid-solve hero grid (server-rendered, aria-hidden)
@@ -173,89 +174,16 @@ export default async function LandingPage({
           </b>
         </p>
 
-        {/* Mode selector — plain anchor links; active state is server-rendered
-            so it works correctly before any JS loads. Full-page GET on click. */}
-        <div
-          className="mt-9 mx-4 flex"
-          style={{
-            boxShadow: "inset 0 0 0 1px var(--border)",
-            borderRadius: "9999px",
-          }}
-        >
-          {(["coffee", "deep"] as const).map((m, idx) => (
-            <a
-              key={m}
-              href={`/?mode=${m}`}
-              style={{
-                fontFamily: "inherit",
-                fontSize: "15px",
-                padding: "13px 28px",
-                background: mode === m ? "var(--bg-elev-2)" : "transparent",
-                color: mode === m ? "var(--fg)" : "var(--fg-muted)",
-                textDecoration: "none",
-                whiteSpace: "nowrap",
-                transition: "background .15s, color .15s",
-                borderRadius:
-                  idx === 0 ? "9999px 0 0 9999px" : "0 9999px 9999px 0",
-                flex: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {m === "coffee" ? "☕ Coffee · 4 × 4" : "🌊 Deep · 5 × 5"}
-            </a>
-          ))}
-        </div>
-
-        {/* Action links — styled as buttons, but plain <a> tags.
-            "how to play" uses CSS :target to open the overlay (no JS).
-            "play" navigates to the puzzle with the selected mode. */}
-        <div
-          className="mt-6 mx-4 flex flex-wrap justify-center"
-          style={{ gap: "14px" }}
-        >
-          <a
-            href="#howto"
-            className="btn-ghost rounded-full text-fg transition-colors"
-            style={{
-              fontFamily: "inherit",
-              fontSize: "16px",
-              letterSpacing: "0.02em",
-              padding: "16px 40px",
-              background: "transparent",
-              textDecoration: "none",
-              boxShadow: "inset 0 0 0 1px var(--border)",
-              display: "inline-flex",
-              alignItems: "center",
-            }}
-          >
-            how to play
-          </a>
-          <a
-            href={`/play?mode=${mode}`}
-            className="btn-play rounded-full transition-colors"
-            style={{
-              fontFamily: "inherit",
-              fontSize: "16px",
-              letterSpacing: "0.02em",
-              padding: "16px 40px",
-              color: "var(--accent-green)",
-              boxShadow: "inset 0 0 0 1.5px var(--accent-green)",
-              background: "rgba(109,191,109,0.08)",
-              textDecoration: "none",
-              display: "inline-flex",
-              alignItems: "center",
-            }}
-          >
-            play
-          </a>
-        </div>
+        {/* Mode selector + action buttons — client component so switching tabs
+            uses history.replaceState() instead of a full page reload. The
+            server-rendered initialMode sets the correct active state on first
+            paint; after that, mode state lives in the component. */}
+        <ModeSelector initialMode={mode} />
 
         {/* Countdown section — client component. Shows date + live countdown.
             Falls back to an empty space if JS doesn't load (page still usable). */}
         <Suspense fallback={<div className="mt-14" style={{ height: "112px" }} />}>
-          <CountdownSection mode={mode} />
+          <CountdownSection initialMode={mode} />
         </Suspense>
 
         <div
