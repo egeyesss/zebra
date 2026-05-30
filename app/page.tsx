@@ -1,69 +1,267 @@
-import Link from "next/link";
-
-import { CluePanel } from "@/components/CluePanel";
-import { Hud } from "@/components/Hud";
-import { PuzzleGrid } from "@/components/PuzzleGrid";
-import { TrackBadge } from "@/components/TrackBadge";
-import { Wordmark } from "@/components/Wordmark";
-import { LAUNCH_DATE, trackForSize } from "@/lib/config";
-import { getPool } from "@/lib/data/puzzles";
-import { puzzleNumber, selectDailyPuzzle } from "@/lib/data/selection";
-
 /**
- * Today's puzzle — PLACEHOLDER.
+ * Landing page — server component.
  *
- * Wires the data layer to the layout shell: it picks the scheduled puzzle and
- * renders the grid + clue panel in the design's grid-dominant layout. There is
- * no interaction, timer, or scoring — those come later. Before launch (or once
- * the bank is exhausted) nothing is scheduled, so we fall back to previewing the
- * first pool puzzle just so the shell is visible during development.
+ * All interactions use native browser behaviour (links / CSS :target) so they
+ * work on every device regardless of whether React's client-side JavaScript has
+ * finished loading or is running at all.
+ *
+ * Mode selection  →  plain <a href="/?mode=..."> (full-page GET, server renders active state)
+ * How to play     →  <a href="#howto"> + CSS :target overlay (zero JavaScript)
+ * Play            →  plain <a href="/play?mode=...">
+ * Countdown       →  CountdownSection client component (graceful: invisible if JS fails)
  */
-export default function HomePage() {
-  const scheduled = selectDailyPuzzle(getPool());
-  const puzzle = scheduled ?? getPool()[0];
-  const isPreview = scheduled === null;
-  const number = puzzleNumber();
-  const track = trackForSize(puzzle.size);
+
+import { Suspense } from "react";
+
+import { CountdownSection } from "@/components/CountdownSection";
+import { ModeSelector } from "@/components/ModeSelector";
+
+// ---------------------------------------------------------------------------
+// Decorative mid-solve hero grid (server-rendered, aria-hidden)
+// ---------------------------------------------------------------------------
+
+type HeroCell = {
+  committed?: string;
+  selected?: boolean;
+  green?: boolean;
+  dot?: boolean;
+};
+
+const HERO_CELLS: HeroCell[] = [
+  { committed: "Englishman" },
+  {},
+  {},
+  { committed: "Japanese", dot: true },
+  {},
+  { selected: true },
+  {},
+  { committed: "zebra", green: true },
+  {},
+  { committed: "tea" },
+  { committed: "milk" },
+  {},
+  {},
+  {},
+  {},
+  {},
+];
+
+function HeroGrid() {
+  return (
+    <div aria-hidden="true" className="lp-hero-grid">
+      {HERO_CELLS.map((cell, i) => (
+        <div
+          key={i}
+          className="relative"
+          style={{
+            background: cell.green
+              ? "rgba(109,191,109,0.18)"
+              : cell.selected
+                ? "var(--bg-elev-2)"
+                : "var(--bg-elev)",
+            boxShadow: cell.selected
+              ? "inset 0 0 0 2px var(--accent-amber)"
+              : "inset 0 0 0 1px var(--border)",
+          }}
+        >
+          {cell.committed && (
+            <span className="lp-cell-text">{cell.committed}</span>
+          )}
+          {cell.dot && (
+            <span
+              className="absolute top-1.5 right-1.5 rounded-full"
+              style={{ width: 7, height: 7, background: "var(--accent-red)" }}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// How-to-play rules
+// ---------------------------------------------------------------------------
+
+const RULES: { marker: string; color?: string; body: React.ReactNode }[] = [
+  {
+    marker: "▸",
+    body: "Read the clues and deduce the value of every cell in the grid.",
+  },
+  {
+    marker: "▸",
+    body: (
+      <>
+        Tap a cell, tap a value — it <b>commits instantly</b>. No &ldquo;are
+        you sure&rdquo;.
+      </>
+    ),
+  },
+  {
+    marker: "●",
+    color: "var(--accent-red)",
+    body: (
+      <>
+        Change a committed cell and it&apos;s logged as an <b>overwrite</b>.
+        They all count.
+      </>
+    ),
+  },
+  {
+    marker: "✓",
+    color: "var(--accent-green)",
+    body: (
+      <>
+        You get <b>one check</b>, on one cell. That&apos;s your only signal —
+        use it well.
+      </>
+    ),
+  },
+  {
+    marker: "◷",
+    color: "var(--accent-amber)",
+    body: (
+      <>
+        Beat the clock.{" "}
+        <span className="text-fg-muted">10:00 Coffee · 25:00 Deep.</span> Hit
+        the cap and it&apos;s a <b>DNF</b>.
+      </>
+    ),
+  },
+  {
+    marker: "✨",
+    color: "var(--accent-green)",
+    body: (
+      <>
+        Zero overwrites is <b>Flawless</b>. That&apos;s the whole game.
+      </>
+    ),
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
+
+type Mode = "coffee" | "deep";
+
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  const mode: Mode = params.mode === "coffee" ? "coffee" : "deep";
 
   return (
-    <div className="flex flex-1 flex-col">
-      {/* Thin header: wordmark + timer/overwrites, doesn't steal grid height. */}
-      <header className="border-border flex flex-col items-center gap-2 border-b px-4 py-4">
-        <div className="flex w-full items-center justify-between text-sm">
-          <Wordmark />
-          <Link href="/about" className="text-fg-muted hover:text-fg">
-            about
-          </Link>
-        </div>
-        <Hud />
-        <div className="text-fg-muted flex items-center gap-3 text-sm">
-          {number !== null && <span className="tabular-nums">#{number}</span>}
-          <TrackBadge track={track} />
-        </div>
-      </header>
+    <>
+      <main
+        className="flex min-h-full flex-col items-center justify-center"
+        style={{ padding: "32px 24px 28px" }}
+      >
+        <HeroGrid />
 
-      {isPreview && (
-        <p className="text-accent-amber bg-bg-elev px-4 py-2 text-center text-sm">
-          Preview — no puzzle is scheduled yet (launch {LAUNCH_DATE}). Showing a
-          sample.
+        <h1 className="lp-wordmark">z e b r a</h1>
+
+        <p
+          className="mt-6 text-center text-fg-muted"
+          style={{ fontSize: "19px", lineHeight: 1.65, maxWidth: "48ch" }}
+        >
+          Solve the daily logic grid.
+          <br />
+          <b className="text-fg font-medium">
+            No hints, no undo — every commit is final.
+          </b>
         </p>
-      )}
 
-      {/* Grid dominant on the left, clue panel narrow on the right (desktop). */}
-      <main className="grid flex-1 gap-6 p-4 lg:grid-cols-[3fr_1fr]">
-        <section className="flex items-start justify-center">
-          <div className="w-full max-w-2xl">
-            <PuzzleGrid puzzle={puzzle} />
-          </div>
-        </section>
+        {/* Mode selector + action buttons — client component so switching tabs
+            uses history.replaceState() instead of a full page reload. The
+            server-rendered initialMode sets the correct active state on first
+            paint; after that, mode state lives in the component. */}
+        <ModeSelector initialMode={mode} />
 
-        <aside className="border-border bg-bg-elev flex flex-col gap-3 rounded border p-4 lg:max-h-[70vh]">
-          <h2 className="text-fg-muted text-xs tracking-widest uppercase">
-            Clues
-          </h2>
-          <CluePanel clues={puzzle.clues} />
-        </aside>
+        {/* Countdown section — client component. Shows date + live countdown.
+            Falls back to an empty space if JS doesn't load (page still usable). */}
+        <Suspense fallback={<div className="mt-14" style={{ height: "112px" }} />}>
+          <CountdownSection initialMode={mode} />
+        </Suspense>
+
+        <div
+          className="mt-16 text-center text-fg-muted"
+          style={{ fontSize: "13px", letterSpacing: "0.2em", opacity: 0.45 }}
+        >
+          zebra.xyz
+        </div>
       </main>
-    </div>
+
+      {/* How-to-play overlay.
+          Tailwind's CSS optimizer drops :target rules from globals.css, so we
+          inject the one rule that actually toggles visibility via a <style> tag —
+          it lives in the HTML and is never processed by the optimizer.
+          #howto is hidden via Tailwind's `hidden` class (specificity 0,1,0).
+          #howto:target has specificity 1,1,0 — wins, shows the overlay. */}
+      <style>{`#howto:target { display: flex !important; }`}</style>
+
+      <div
+        id="howto"
+        className="hidden fixed inset-0 z-50 items-center justify-center p-6"
+        style={{ background: "rgba(10,8,6,0.8)" }}
+      >
+        {/* Sheet — z-index above the backdrop */}
+        <div
+          className="relative z-10 w-full rounded-[10px] px-7 py-7"
+          style={{
+            maxWidth: "440px",
+            background: "var(--bg-elev)",
+            boxShadow:
+              "inset 0 0 0 1px var(--border), 0 30px 80px rgba(0,0,0,0.6)",
+          }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="mb-[18px] flex items-center justify-between">
+            <span
+              className="text-fg-muted"
+              style={{ fontSize: "11px", letterSpacing: "0.25em" }}
+            >
+              HOW TO PLAY
+            </span>
+            <a
+              href="#_"
+              className="text-fg-muted hover:text-fg px-1 text-sm"
+              style={{ textDecoration: "none" }}
+            >
+              esc ✕
+            </a>
+          </div>
+          <ul className="m-0 list-none p-0">
+            {RULES.map((rule, i) => (
+              <li
+                key={i}
+                className="flex gap-3 py-[11px] text-[15px] leading-relaxed text-fg"
+                style={{
+                  borderTop: i > 0 ? "1px solid var(--border)" : undefined,
+                }}
+              >
+                <span
+                  className="w-3.5 shrink-0 text-center"
+                  style={{ color: rule.color }}
+                >
+                  {rule.marker}
+                </span>
+                <span>{rule.body}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {/* Backdrop — behind the sheet; clicking navigates to #_ which clears
+            :target and hides the overlay */}
+        <a
+          href="#_"
+          className="absolute inset-0 z-0"
+          aria-label="Close how to play"
+        />
+      </div>
+    </>
   );
 }
