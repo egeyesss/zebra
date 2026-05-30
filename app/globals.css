@@ -48,6 +48,7 @@ button { touch-action: manipulation; }
 .btn-ghost:hover  { background: var(--bg-elev-2); }
 .btn-play:hover   { background: rgba(109, 191, 109, 0.16); }
 
+
 /* Landing page: fluid scaling so hero grid and wordmark fit all screen widths.
    clamp() keeps them at their designed size on desktop while shrinking
    proportionally to avoid horizontal overflow on phones. */

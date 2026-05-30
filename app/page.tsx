@@ -1,36 +1,22 @@
-"use client";
+/**
+ * Landing page — server component.
+ *
+ * All interactions use native browser behaviour (links / CSS :target) so they
+ * work on every device regardless of whether React's client-side JavaScript has
+ * finished loading or is running at all.
+ *
+ * Mode selection  →  plain <a href="/?mode=..."> (full-page GET, server renders active state)
+ * How to play     →  <a href="#howto"> + CSS :target overlay (zero JavaScript)
+ * Play            →  plain <a href="/play?mode=...">
+ * Countdown       →  CountdownSection client component (graceful: invisible if JS fails)
+ */
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Suspense } from "react";
 
-import { RESET_TIMEZONE } from "@/lib/config";
-import { puzzleNumber } from "@/lib/data/selection";
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function secsToMidnight(): number {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: RESET_TIMEZONE,
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).formatToParts(new Date());
-  const get = (t: string) =>
-    parseInt(parts.find((p) => p.type === t)!.value, 10);
-  let h = get("hour");
-  if (h === 24) h = 0;
-  return 86400 - (h * 3600 + get("minute") * 60 + get("second"));
-}
-
-function pad(n: number) {
-  return String(n).padStart(2, "0");
-}
+import { CountdownSection } from "@/components/CountdownSection";
 
 // ---------------------------------------------------------------------------
-// Decorative mid-solve hero grid
+// Decorative mid-solve hero grid (server-rendered, aria-hidden)
 // ---------------------------------------------------------------------------
 
 type HeroCell = {
@@ -93,7 +79,7 @@ function HeroGrid() {
 }
 
 // ---------------------------------------------------------------------------
-// How-to-play overlay
+// How-to-play rules
 // ---------------------------------------------------------------------------
 
 const RULES: { marker: string; color?: string; body: React.ReactNode }[] = [
@@ -152,111 +138,19 @@ const RULES: { marker: string; color?: string; body: React.ReactNode }[] = [
   },
 ];
 
-function HowToPlayOverlay({ onClose }: { onClose: () => void }) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-6"
-      style={{ background: "rgba(10,8,6,0.8)" }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div
-        className="w-full rounded-[10px] px-7 py-7"
-        style={{
-          maxWidth: "440px",
-          background: "var(--bg-elev)",
-          boxShadow:
-            "inset 0 0 0 1px var(--border), 0 30px 80px rgba(0,0,0,0.6)",
-        }}
-        role="dialog"
-        aria-modal="true"
-      >
-        <div className="mb-[18px] flex items-center justify-between">
-          <span
-            className="text-fg-muted"
-            style={{ fontSize: "11px", letterSpacing: "0.25em" }}
-          >
-            HOW TO PLAY
-          </span>
-          <button
-            onClick={onClose}
-            className="text-fg-muted hover:text-fg px-1 text-sm"
-          >
-            esc ✕
-          </button>
-        </div>
-        <ul className="m-0 list-none p-0">
-          {RULES.map((rule, i) => (
-            <li
-              key={i}
-              className="flex gap-3 py-[11px] text-[15px] leading-relaxed text-fg"
-              style={{
-                borderTop:
-                  i > 0 ? "1px solid var(--border)" : undefined,
-              }}
-            >
-              <span
-                className="w-3.5 shrink-0 text-center"
-                style={{ color: rule.color }}
-              >
-                {rule.marker}
-              </span>
-              <span>{rule.body}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
 // ---------------------------------------------------------------------------
-// Landing page
+// Page
 // ---------------------------------------------------------------------------
 
 type Mode = "coffee" | "deep";
 
-export default function LandingPage() {
-  const [mode, setMode] = useState<Mode>("deep");
-  const [showHowTo, setShowHowTo] = useState(false);
-  const [countdown, setCountdown] = useState("");
-  const [date, setDate] = useState("");
-
-  // Client-only: deferred via rAF to avoid hydration mismatch and satisfy
-  // react-hooks/set-state-in-effect (no synchronous setState in effect body).
-  useEffect(() => {
-    function update() {
-      setDate(
-        new Intl.DateTimeFormat("en-US", {
-          timeZone: RESET_TIMEZONE,
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        }).format(new Date()),
-      );
-      const s = secsToMidnight();
-      setCountdown(
-        `${pad(Math.floor(s / 3600))}h ${pad(Math.floor((s % 3600) / 60))}m ${pad(s % 60)}s`,
-      );
-    }
-    const raf = requestAnimationFrame(update);
-    const id = setInterval(update, 1000);
-    return () => {
-      cancelAnimationFrame(raf);
-      clearInterval(id);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!showHowTo) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowHowTo(false);
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [showHowTo]);
-
-  const number = puzzleNumber();
-  const modeLabel = mode === "coffee" ? "☕ Coffee · 4 × 4" : "🌊 Deep · 5 × 5";
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  const mode: Mode = params.mode === "coffee" ? "coffee" : "deep";
 
   return (
     <>
@@ -266,10 +160,8 @@ export default function LandingPage() {
       >
         <HeroGrid />
 
-        {/* Wordmark */}
         <h1 className="lp-wordmark">z e b r a</h1>
 
-        {/* Tagline */}
         <p
           className="mt-6 text-center text-fg-muted"
           style={{ fontSize: "19px", lineHeight: 1.65, maxWidth: "48ch" }}
@@ -281,48 +173,50 @@ export default function LandingPage() {
           </b>
         </p>
 
-        {/* Mode selector
-            overflow-hidden is intentionally absent: on iOS WebKit, combining
-            overflow:hidden with border-radius clips the touch hit-test to the
-            rectangular bounding box, so taps in the rounded corners miss. We
-            round each button individually instead. */}
+        {/* Mode selector — plain anchor links; active state is server-rendered
+            so it works correctly before any JS loads. Full-page GET on click. */}
         <div
           className="mt-9 mx-4 flex"
-          style={{ boxShadow: "inset 0 0 0 1px var(--border)", borderRadius: "9999px" }}
+          style={{
+            boxShadow: "inset 0 0 0 1px var(--border)",
+            borderRadius: "9999px",
+          }}
         >
           {(["coffee", "deep"] as const).map((m, idx) => (
-            <button
+            <a
               key={m}
-              onClick={() => setMode(m)}
+              href={`/?mode=${m}`}
               style={{
                 fontFamily: "inherit",
                 fontSize: "15px",
                 padding: "13px 28px",
                 background: mode === m ? "var(--bg-elev-2)" : "transparent",
                 color: mode === m ? "var(--fg)" : "var(--fg-muted)",
-                // Always pointer — iOS Safari can suppress clicks on cursor:default elements
-                cursor: "pointer",
-                border: "none",
-                outline: "none",
+                textDecoration: "none",
                 whiteSpace: "nowrap",
                 transition: "background .15s, color .15s",
-                // Individual border-radius replaces the parent overflow-hidden
-                borderRadius: idx === 0 ? "9999px 0 0 9999px" : "0 9999px 9999px 0",
+                borderRadius:
+                  idx === 0 ? "9999px 0 0 9999px" : "0 9999px 9999px 0",
                 flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               {m === "coffee" ? "☕ Coffee · 4 × 4" : "🌊 Deep · 5 × 5"}
-            </button>
+            </a>
           ))}
         </div>
 
-        {/* Action buttons — mx-4 keeps them off the screen edges */}
+        {/* Action links — styled as buttons, but plain <a> tags.
+            "how to play" uses CSS :target to open the overlay (no JS).
+            "play" navigates to the puzzle with the selected mode. */}
         <div
           className="mt-6 mx-4 flex flex-wrap justify-center"
           style={{ gap: "14px" }}
         >
-          <button
-            onClick={() => setShowHowTo(true)}
+          <a
+            href="#howto"
             className="btn-ghost rounded-full text-fg transition-colors"
             style={{
               fontFamily: "inherit",
@@ -330,16 +224,17 @@ export default function LandingPage() {
               letterSpacing: "0.02em",
               padding: "16px 40px",
               background: "transparent",
-              border: "none",
+              textDecoration: "none",
               boxShadow: "inset 0 0 0 1px var(--border)",
-              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
             }}
           >
             how to play
-          </button>
-          <Link
+          </a>
+          <a
             href={`/play?mode=${mode}`}
-            className="btn-play rounded-full no-underline transition-colors"
+            className="btn-play rounded-full transition-colors"
             style={{
               fontFamily: "inherit",
               fontSize: "16px",
@@ -348,42 +243,21 @@ export default function LandingPage() {
               color: "var(--accent-green)",
               boxShadow: "inset 0 0 0 1.5px var(--accent-green)",
               background: "rgba(109,191,109,0.08)",
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
             }}
           >
             play
-          </Link>
+          </a>
         </div>
 
-        {/* Meta block */}
-        <div className="mt-14 text-center" style={{ lineHeight: 2 }}>
-          {date && (
-            <div
-              className="text-fg font-bold"
-              style={{ fontSize: "16px", letterSpacing: "0.04em" }}
-            >
-              {date}
-            </div>
-          )}
-          {number !== null && (
-            <div className="text-fg-muted" style={{ fontSize: "15px" }}>
-              No. {String(number).padStart(3, "0")}
-            </div>
-          )}
-          <div className="text-fg-muted" style={{ fontSize: "15px" }}>
-            {modeLabel}
-          </div>
-          {countdown && (
-            <div
-              className="text-fg-muted mt-2.5"
-              style={{ fontSize: "14px", opacity: 0.7, whiteSpace: "nowrap" }}
-            >
-              new puzzle in{" "}
-              <b className="text-accent-amber font-normal">{countdown}</b>
-            </div>
-          )}
-        </div>
+        {/* Countdown section — client component. Shows date + live countdown.
+            Falls back to an empty space if JS doesn't load (page still usable). */}
+        <Suspense fallback={<div className="mt-14" style={{ height: "112px" }} />}>
+          <CountdownSection mode={mode} />
+        </Suspense>
 
-        {/* Footer */}
         <div
           className="mt-16 text-center text-fg-muted"
           style={{ fontSize: "13px", letterSpacing: "0.2em", opacity: 0.45 }}
@@ -392,7 +266,74 @@ export default function LandingPage() {
         </div>
       </main>
 
-      {showHowTo && <HowToPlayOverlay onClose={() => setShowHowTo(false)} />}
+      {/* How-to-play overlay.
+          Tailwind's CSS optimizer drops :target rules from globals.css, so we
+          inject the one rule that actually toggles visibility via a <style> tag —
+          it lives in the HTML and is never processed by the optimizer.
+          #howto is hidden via Tailwind's `hidden` class (specificity 0,1,0).
+          #howto:target has specificity 1,1,0 — wins, shows the overlay. */}
+      <style>{`#howto:target { display: flex !important; }`}</style>
+
+      <div
+        id="howto"
+        className="hidden fixed inset-0 z-50 items-center justify-center p-6"
+        style={{ background: "rgba(10,8,6,0.8)" }}
+      >
+        {/* Sheet — z-index above the backdrop */}
+        <div
+          className="relative z-10 w-full rounded-[10px] px-7 py-7"
+          style={{
+            maxWidth: "440px",
+            background: "var(--bg-elev)",
+            boxShadow:
+              "inset 0 0 0 1px var(--border), 0 30px 80px rgba(0,0,0,0.6)",
+          }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="mb-[18px] flex items-center justify-between">
+            <span
+              className="text-fg-muted"
+              style={{ fontSize: "11px", letterSpacing: "0.25em" }}
+            >
+              HOW TO PLAY
+            </span>
+            <a
+              href="#_"
+              className="text-fg-muted hover:text-fg px-1 text-sm"
+              style={{ textDecoration: "none" }}
+            >
+              esc ✕
+            </a>
+          </div>
+          <ul className="m-0 list-none p-0">
+            {RULES.map((rule, i) => (
+              <li
+                key={i}
+                className="flex gap-3 py-[11px] text-[15px] leading-relaxed text-fg"
+                style={{
+                  borderTop: i > 0 ? "1px solid var(--border)" : undefined,
+                }}
+              >
+                <span
+                  className="w-3.5 shrink-0 text-center"
+                  style={{ color: rule.color }}
+                >
+                  {rule.marker}
+                </span>
+                <span>{rule.body}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {/* Backdrop — behind the sheet; clicking navigates to #_ which clears
+            :target and hides the overlay */}
+        <a
+          href="#_"
+          className="absolute inset-0 z-0"
+          aria-label="Close how to play"
+        />
+      </div>
     </>
   );
 }
