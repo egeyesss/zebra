@@ -188,7 +188,7 @@ export default async function LandingPage({
         </Suspense>
 
         <div
-          className="mt-16 flex flex-col items-center gap-2"
+          className="mt-6 flex flex-col items-center gap-2"
           style={{ fontSize: "13px" }}
         >
           <a
