@@ -72,6 +72,17 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
     Record<string, string[]>
   >(() => ({ ...puzzle.theme.attributes }));
 
+  // Escape key closes the about modal when it's open.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && window.location.hash === "#zebra-about") {
+        window.location.hash = "_";
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   useEffect(() => {
     const result: Record<string, string[]> = {};
     for (const [cat, vals] of Object.entries(puzzle.theme.attributes)) {
@@ -180,7 +191,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
               className="text-fg-muted hover:text-fg px-1 text-sm"
               style={{ textDecoration: "none" }}
             >
-              ×
+              esc ×
             </a>
           </div>
           <div className="flex flex-col gap-4 text-sm leading-relaxed">

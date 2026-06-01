@@ -14,6 +14,7 @@
 import { Suspense } from "react";
 
 import { CountdownSection } from "@/components/CountdownSection";
+import { EscapeClose } from "@/components/EscapeClose";
 import { ModeSelector } from "@/components/ModeSelector";
 
 // ---------------------------------------------------------------------------
@@ -235,6 +236,7 @@ export default async function LandingPage({
           role="dialog"
           aria-modal="true"
         >
+          <EscapeClose activeHash="howto" closeTo="#_" />
           <div className="mb-[18px] flex items-center justify-between">
             <span
               className="text-fg-muted"
