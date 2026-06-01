@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 import type { ExportedPuzzle, Track } from "@/types/puzzle";
-import { LAUNCH_DATE } from "@/lib/config";
+import { LAUNCH_DATE, TRACKS } from "@/lib/config";
 
 import { CellPicker } from "./CellPicker";
 import { ClueDrawer } from "./ClueDrawer";
@@ -50,6 +50,8 @@ function checkSolved(
 }
 
 export function PlaySession({ puzzle, isPreview, number, track }: Props) {
+  const [started, setStarted] = useState(false);
+  const [dnf, setDnf] = useState(false);
   const [committed, setCommitted] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<{
     category: string;
@@ -62,6 +64,13 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const [justCommitted, setJustCommitted] = useState<string | null>(null);
   // TODO: wire solved → result-screen overlay (result-screen session)
   const [solved, setSolved] = useState(false);
+
+  const { hardCapSeconds } = TRACKS[track];
+
+  function handleDnf() {
+    setDnf(true);
+    setSelected(null);
+  }
 
   const questionText = buildQuestionText(puzzle);
 
@@ -100,7 +109,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   }, []);
 
   function handleCellSelect(category: string, position: number) {
-    if (solved) return;
+    if (!started || solved || dnf) return;
     setSelected((prev) =>
       prev?.category === category && prev?.position === position
         ? null
@@ -109,7 +118,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   }
 
   function handleCommit(value: string) {
-    if (!selected) return;
+    if (!selected || !started || dnf || solved) return;
     const key = `${selected.category}:${selected.position}`;
     const existing = committed[key];
 
@@ -149,6 +158,17 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
       // TODO: replace with full result-screen overlay (result-screen session)
     }
   }
+
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll the desktop picker into view when a cell is selected.
+  // offsetParent is null for display:none elements, so this is a no-op on mobile.
+  useEffect(() => {
+    if (!selected || !pickerRef.current) return;
+    if (pickerRef.current.offsetParent !== null) {
+      pickerRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [selected]);
 
   const pickerValues = selected ? shuffledAttributes[selected.category] : null;
   const pickerCurrentValue = selected
@@ -235,7 +255,14 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
             about
           </a>
         </div>
-        <Hud overwrites={overwrites} />
+        <Hud
+          started={started}
+          solved={solved}
+          dnf={dnf}
+          hardCapSeconds={hardCapSeconds}
+          overwrites={overwrites}
+          onDnf={handleDnf}
+        />
         <div className="text-fg-muted flex items-center gap-3 text-sm">
           {number !== null && <span className="tabular-nums">#{number}</span>}
           <TrackBadge track={track} />
@@ -250,11 +277,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
         </p>
       )}
 
-      {/*
-       * TODO: replace with full result-screen overlay when that session ships.
-       * Bare "Solved." banner keeps the interaction loop testable end-to-end
-       * without blocking on the result screen.
-       */}
+      {/* TODO: replace both banners with the full result-screen overlay (result-screen session). */}
       {solved && (
         <div
           className="border-b px-4 py-3 text-center text-sm"
@@ -266,40 +289,85 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
           <span style={{ color: "var(--accent-green)" }}>Solved.</span>
         </div>
       )}
+      {dnf && !solved && (
+        <div
+          className="border-b px-4 py-3 text-center text-sm"
+          style={{
+            backgroundColor: "rgba(207,84,84,0.08)",
+            borderColor: "rgba(207,84,84,0.25)",
+          }}
+        >
+          {/* TODO: replace with full result-screen overlay (result-screen session) */}
+          <span style={{ color: "var(--accent-red)" }}>DNF.</span>
+        </div>
+      )}
 
-      <main className="grid flex-1 gap-6 pt-4 px-4 pb-28 lg:pb-4 lg:grid-cols-[3fr_1fr]">
-        <section className="flex items-start justify-center">
-          <div className="flex w-full max-w-2xl flex-col gap-3">
-            <PuzzleGrid
-              puzzle={puzzle}
-              committed={committed}
-              selected={selected}
-              overwrittenCells={overwrittenCells}
-              justCommitted={justCommitted}
-              onCellSelect={handleCellSelect}
-            />
-
-            {pickerValues && (
-              <div className="hidden lg:block">
-                <CellPicker
-                  values={pickerValues}
-                  currentValue={pickerCurrentValue}
-                  onCommit={handleCommit}
-                />
+      <main className="flex flex-1 flex-col items-center gap-6 pt-4 px-4 pb-28 lg:flex-row lg:items-start lg:justify-center lg:pb-4">
+        <div className="flex w-full max-w-2xl flex-shrink-0 flex-col gap-3">
+          {!started ? (
+            <div className="flex flex-col items-center gap-8 px-4 py-16">
+              {questionText && (
+                <p
+                  className="text-fg text-center"
+                  style={{ fontSize: "22px", lineHeight: 1.5 }}
+                >
+                  {questionText}
+                </p>
+              )}
+              <div className="flex flex-col items-center gap-4">
+                <p className="text-fg-muted text-center text-sm">
+                  {`${Math.floor(hardCapSeconds / 60)}:00 on the clock — timer starts when you do.`}
+                </p>
+                <button
+                  onClick={() => setStarted(true)}
+                  className="rounded px-8 py-2.5 text-sm font-medium"
+                  style={{
+                    background: "transparent",
+                    border: "1.5px solid var(--accent-green)",
+                    color: "var(--accent-green)",
+                    cursor: "pointer",
+                    letterSpacing: "0.12em",
+                  }}
+                >
+                  start
+                </button>
               </div>
-            )}
-          </div>
-        </section>
+            </div>
+          ) : (
+            <>
+              <PuzzleGrid
+                puzzle={puzzle}
+                committed={committed}
+                selected={selected}
+                overwrittenCells={overwrittenCells}
+                justCommitted={justCommitted}
+                onCellSelect={handleCellSelect}
+              />
 
-        <aside className="border-border bg-bg-elev hidden flex-col gap-3 rounded border p-4 lg:flex lg:max-h-[70vh]">
-          <h2 className="text-fg-muted text-xs tracking-widest uppercase">
-            Clues
-          </h2>
-          <CluePanel clues={puzzle.clues} />
-        </aside>
+              {pickerValues && (
+                <div ref={pickerRef} className="hidden lg:block">
+                  <CellPicker
+                    values={pickerValues}
+                    currentValue={pickerCurrentValue}
+                    onCommit={handleCommit}
+                  />
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {started && (
+          <aside className="border-border bg-bg-elev hidden w-64 flex-shrink-0 flex-col gap-3 rounded border p-4 lg:flex lg:max-h-[70vh]">
+            <h2 className="text-fg-muted text-xs tracking-widest uppercase">
+              Clues
+            </h2>
+            <CluePanel clues={puzzle.clues} />
+          </aside>
+        )}
       </main>
 
-      {pickerValues && (
+      {started && !dnf && pickerValues && (
         <div
           className="fixed inset-x-0 z-50 px-3 py-2 lg:hidden"
           style={{ bottom: "3.5rem" }}
@@ -312,7 +380,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
         </div>
       )}
 
-      <ClueDrawer clues={puzzle.clues} />
+      {started && <ClueDrawer clues={puzzle.clues} />}
     </div>
   );
 }
