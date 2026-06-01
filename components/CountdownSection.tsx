@@ -66,7 +66,12 @@ export function CountdownSection({
   }, []);
 
   const number = puzzleNumber();
-  const modeLabel = mode === "coffee" ? "☕ Coffee · 4 × 4" : "🌊 Deep · 5 × 5";
+  const modeLabel =
+    mode === "coffee" ? (
+      <><span style={{ fontSize: "1.3em", marginRight: "0.35em" }}>☕️</span>Coffee · 4 × 4</>
+    ) : (
+      <><span style={{ fontSize: "1.3em", marginRight: "0.35em" }}>🌊</span>Deep · 5 × 5</>
+    );
 
   return (
     <div className="mt-14 text-center" style={{ lineHeight: 2 }}>

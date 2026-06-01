@@ -55,7 +55,11 @@ export function ModeSelector({ initialMode }: { initialMode: Mode }) {
               justifyContent: "center",
             }}
           >
-            {m === "coffee" ? "☕ Coffee · 4 × 4" : "🌊 Deep · 5 × 5"}
+            {m === "coffee" ? (
+              <><span style={{ fontSize: "1.3em", marginRight: "0.35em" }}>☕️</span>Coffee · 4 × 4</>
+            ) : (
+              <><span style={{ fontSize: "1.3em", marginRight: "0.35em" }}>🌊</span>Deep · 5 × 5</>
+            )}
           </a>
         ))}
       </div>

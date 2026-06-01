@@ -37,7 +37,7 @@ export const TRACKS: Record<Track, TrackConfig> = {
   coffee: {
     id: "coffee",
     label: "Coffee",
-    emoji: "☕", // ☕
+    emoji: "☕️", // ☕ U+FE0F forces emoji presentation over text/symbol
     size: 4,
     hardCapSeconds: 10 * 60,
   },

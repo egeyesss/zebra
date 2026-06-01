@@ -1,27 +1,64 @@
+"use client";
+
+import { Fragment, useEffect, useRef } from "react";
+
 import type { ExportedPuzzle } from "@/types/puzzle";
 
-/**
- * The solving grid — STATIC placeholder.
- *
- * Lays out one row per attribute category and one column per position (seat /
- * house / desk), the surface the player will eventually commit values into.
- * Cells are empty: there is no cell selection, picker, commit, or note mode
- * yet. This exists so the layout shell and theming can be seen end-to-end.
- */
-export function PuzzleGrid({ puzzle }: { puzzle: ExportedPuzzle }) {
+interface Props {
+  puzzle: ExportedPuzzle;
+  committed: Record<string, string>;
+  selected: { category: string; position: number } | null;
+  overwrittenCells: Set<string>;
+  justCommitted: string | null;
+  onCellSelect: (category: string, position: number) => void;
+}
+
+export function PuzzleGrid({
+  puzzle,
+  committed,
+  selected,
+  overwrittenCells,
+  justCommitted,
+  onCellSelect,
+}: Props) {
   const categories = Object.keys(puzzle.theme.attributes);
   const positions = Array.from({ length: puzzle.size }, (_, i) => i + 1);
-
-  // One label column plus one column per position.
   const templateColumns = `minmax(5rem, auto) repeat(${puzzle.size}, minmax(3rem, 1fr))`;
+
+  const gridRef = useRef<HTMLDivElement>(null);
+  // Keep a stable ref to the latest callback so the native handler never goes stale.
+  const onCellSelectRef = useRef(onCellSelect);
+  useEffect(() => {
+    onCellSelectRef.current = onCellSelect;
+  });
+
+  // Native click delegation — React's synthetic onClick doesn't fire on iOS
+  // Safari in Turbopack dev mode. addEventListener bypasses React's event system.
+  useEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const handler = (e: Event) => {
+      const cell = (e.target as Element).closest(
+        "[data-cat]",
+      ) as HTMLElement | null;
+      if (!cell) return;
+      e.preventDefault();
+      const cat = cell.dataset.cat!;
+      const pos = parseInt(cell.dataset.pos!);
+      onCellSelectRef.current(cat, pos);
+    };
+    el.addEventListener("click", handler);
+    return () => el.removeEventListener("click", handler);
+  }, []);
 
   return (
     <div
+      ref={gridRef}
       className="border-border grid gap-px rounded border bg-[var(--border)] text-sm"
       style={{ gridTemplateColumns: templateColumns }}
       aria-label={`${puzzle.size} by ${categories.length} solving grid`}
     >
-      {/* Header row: empty corner + position numbers. */}
+      {/* Header row: position label + column numbers */}
       <div className="bg-bg-elev text-fg-muted px-2 py-2 capitalize">
         {puzzle.theme.position_label}
       </div>
@@ -34,19 +71,55 @@ export function PuzzleGrid({ puzzle }: { puzzle: ExportedPuzzle }) {
         </div>
       ))}
 
-      {/* One row per category, with empty (uncommitted) cells. */}
+      {/* One row per attribute category — Fragment avoids display:contents WebKit bugs */}
       {categories.map((category) => (
-        <div key={category} className="contents">
+        <Fragment key={category}>
           <div className="bg-bg-elev text-fg-muted px-2 py-3 capitalize">
             {category}
           </div>
-          {positions.map((pos) => (
-            <div
-              key={`${category}-${pos}`}
-              className="bg-bg-elev-2 aspect-square min-h-12"
-            />
-          ))}
-        </div>
+          {positions.map((pos) => {
+            const key = `${category}:${pos}`;
+            const value = committed[key];
+            const isSelected =
+              selected?.category === category && selected?.position === pos;
+            const isOverwritten = overwrittenCells.has(key);
+            const isFlashing = justCommitted === key;
+
+            return (
+              // href="#" makes the element natively clickable on iOS Safari;
+              // e.preventDefault() in the container's native handler stops hash nav.
+              <a
+                key={key}
+                href="#"
+                role="button"
+                aria-pressed={isSelected}
+                data-cat={category}
+                data-pos={String(pos)}
+                className={[
+                  "aspect-square min-h-12 flex items-center justify-center relative",
+                  isFlashing ? "cell-flash" : "bg-bg-elev-2",
+                ].join(" ")}
+                style={
+                  isSelected && !isFlashing
+                    ? { boxShadow: "inset 0 0 0 1.5px var(--accent-amber)" }
+                    : undefined
+                }
+              >
+                {value && (
+                  <span className="text-fg text-xs leading-tight text-center px-1 break-all">
+                    {value}
+                  </span>
+                )}
+                {isOverwritten && (
+                  <span
+                    className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: "var(--accent-red)" }}
+                  />
+                )}
+              </a>
+            );
+          })}
+        </Fragment>
       ))}
     </div>
   );

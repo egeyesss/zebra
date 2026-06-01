@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { EscapeClose } from "@/components/EscapeClose";
 import { Wordmark } from "@/components/Wordmark";
 
 export const metadata: Metadata = {
@@ -12,12 +13,13 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 py-10">
+      <EscapeClose closeTo="/" />
       <header className="border-border flex items-center justify-between border-b pb-4">
         <Link href="/">
           <Wordmark />
         </Link>
         <Link href="/" className="text-fg-muted hover:text-fg text-sm">
-          play
+          esc ×
         </Link>
       </header>
 

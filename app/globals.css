@@ -40,14 +40,25 @@ body {
   font-family: var(--font-mono);
 }
 
-/* Prevent iOS 300ms tap delay and gesture cancellation on all buttons.
-   Without this, Safari may swallow or delay click events on <button> elements. */
-button { touch-action: manipulation; }
+/* Prevent iOS 300ms tap delay and gesture cancellation on interactive elements.
+   Also covers <a> tags used as buttons on the play page — iOS Safari fires
+   native link clicks even when React's synthetic event delegation breaks in
+   Turbopack dev mode, so interactive <a href="#"> is the reliable pattern. */
+button, a { touch-action: manipulation; }
 
 /* Landing page button hover states */
 .btn-ghost:hover  { background: var(--bg-elev-2); }
 .btn-play:hover   { background: rgba(109, 191, 109, 0.16); }
 
+
+/* Cell commit flash: 400ms green-tint fade to normal background. Applied
+   via the .cell-flash class so the same animation works regardless of which
+   Tailwind background class would otherwise be present on the cell. */
+@keyframes cell-commit {
+  from { background-color: rgba(109, 191, 109, 0.2); }
+  to   { background-color: var(--bg-elev-2); }
+}
+.cell-flash { animation: cell-commit 400ms ease-out forwards; }
 
 /* Landing page: fluid scaling so hero grid and wordmark fit all screen widths.
    clamp() keeps them at their designed size on desktop while shrinking
