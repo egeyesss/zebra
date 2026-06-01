@@ -187,10 +187,26 @@ export default async function LandingPage({
         </Suspense>
 
         <div
-          className="mt-16 text-center text-fg-muted"
-          style={{ fontSize: "13px", letterSpacing: "0.2em", opacity: 0.45 }}
+          className="mt-16 flex flex-col items-center gap-2"
+          style={{ fontSize: "13px" }}
         >
-          zebra.xyz
+          <a
+            href="/about"
+            style={{
+              color: "var(--fg-muted)",
+              textDecoration: "none",
+              letterSpacing: "0.15em",
+              opacity: 0.6,
+            }}
+          >
+            about
+          </a>
+          <div
+            className="text-center text-fg-muted"
+            style={{ letterSpacing: "0.2em", opacity: 0.45 }}
+          >
+            zebra.xyz
+          </div>
         </div>
       </main>
 

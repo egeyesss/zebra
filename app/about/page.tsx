@@ -17,7 +17,7 @@ export default function AboutPage() {
           <Wordmark />
         </Link>
         <Link href="/" className="text-fg-muted hover:text-fg text-sm">
-          play
+          ×
         </Link>
       </header>
 

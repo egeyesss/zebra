@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { ExportedClue } from "@/types/puzzle";
 
@@ -8,6 +8,18 @@ import { CluePanel } from "./CluePanel";
 
 export function ClueDrawer({ clues }: { clues: ExportedClue[] }) {
   const [expanded, setExpanded] = useState(false);
+  const handleRef = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    const el = handleRef.current;
+    if (!el) return;
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setExpanded((prev) => !prev);
+    };
+    el.addEventListener("click", handler);
+    return () => el.removeEventListener("click", handler);
+  }, []);
 
   return (
     <div
@@ -18,14 +30,15 @@ export function ClueDrawer({ clues }: { clues: ExportedClue[] }) {
           : "translateY(calc(100% - 3.5rem))",
       }}
     >
-      <button
-        type="button"
-        onClick={() => setExpanded((e) => !e)}
+      <a
+        ref={handleRef}
+        href="#"
+        role="button"
         className="flex items-center gap-2 w-full px-4 h-14 shrink-0 text-fg-muted text-sm"
       >
         <span>{expanded ? "▼" : "▲"}</span>
         <span>Clues ({clues.length})</span>
-      </button>
+      </a>
       <div className="flex-1 overflow-y-auto px-4 py-3 border-t border-border">
         <CluePanel clues={clues} />
       </div>

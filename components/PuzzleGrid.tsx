@@ -1,5 +1,7 @@
 "use client";
 
+import { Fragment, useEffect, useRef } from "react";
+
 import type { ExportedPuzzle } from "@/types/puzzle";
 
 interface Props {
@@ -23,8 +25,35 @@ export function PuzzleGrid({
   const positions = Array.from({ length: puzzle.size }, (_, i) => i + 1);
   const templateColumns = `minmax(5rem, auto) repeat(${puzzle.size}, minmax(3rem, 1fr))`;
 
+  const gridRef = useRef<HTMLDivElement>(null);
+  // Keep a stable ref to the latest callback so the native handler never goes stale.
+  const onCellSelectRef = useRef(onCellSelect);
+  useEffect(() => {
+    onCellSelectRef.current = onCellSelect;
+  });
+
+  // Native click delegation — React's synthetic onClick doesn't fire on iOS
+  // Safari in Turbopack dev mode. addEventListener bypasses React's event system.
+  useEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const handler = (e: Event) => {
+      const cell = (e.target as Element).closest(
+        "[data-cat]",
+      ) as HTMLElement | null;
+      if (!cell) return;
+      e.preventDefault();
+      const cat = cell.dataset.cat!;
+      const pos = parseInt(cell.dataset.pos!);
+      onCellSelectRef.current(cat, pos);
+    };
+    el.addEventListener("click", handler);
+    return () => el.removeEventListener("click", handler);
+  }, []);
+
   return (
     <div
+      ref={gridRef}
       className="border-border grid gap-px rounded border bg-[var(--border)] text-sm"
       style={{ gridTemplateColumns: templateColumns }}
       aria-label={`${puzzle.size} by ${categories.length} solving grid`}
@@ -42,9 +71,9 @@ export function PuzzleGrid({
         </div>
       ))}
 
-      {/* One row per attribute category */}
+      {/* One row per attribute category — Fragment avoids display:contents WebKit bugs */}
       {categories.map((category) => (
-        <div key={category} className="contents">
+        <Fragment key={category}>
           <div className="bg-bg-elev text-fg-muted px-2 py-3 capitalize">
             {category}
           </div>
@@ -57,12 +86,15 @@ export function PuzzleGrid({
             const isFlashing = justCommitted === key;
 
             return (
-              <button
+              // href="#" makes the element natively clickable on iOS Safari;
+              // e.preventDefault() in the container's native handler stops hash nav.
+              <a
                 key={key}
-                type="button"
-                onClick={() => onCellSelect(category, pos)}
-                // cell-flash handles background during the 400ms commit animation;
-                // bg-bg-elev-2 is the default resting state.
+                href="#"
+                role="button"
+                aria-pressed={isSelected}
+                data-cat={category}
+                data-pos={String(pos)}
                 className={[
                   "aspect-square min-h-12 flex items-center justify-center relative",
                   isFlashing ? "cell-flash" : "bg-bg-elev-2",
@@ -72,7 +104,6 @@ export function PuzzleGrid({
                     ? { boxShadow: "inset 0 0 0 1.5px var(--accent-amber)" }
                     : undefined
                 }
-                aria-pressed={isSelected}
               >
                 {value && (
                   <span className="text-fg text-xs leading-tight text-center px-1 break-all">
@@ -85,10 +116,10 @@ export function PuzzleGrid({
                     style={{ backgroundColor: "var(--accent-red)" }}
                   />
                 )}
-              </button>
+              </a>
             );
           })}
-        </div>
+        </Fragment>
       ))}
     </div>
   );

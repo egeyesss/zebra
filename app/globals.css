@@ -40,9 +40,11 @@ body {
   font-family: var(--font-mono);
 }
 
-/* Prevent iOS 300ms tap delay and gesture cancellation on all buttons.
-   Without this, Safari may swallow or delay click events on <button> elements. */
-button { touch-action: manipulation; }
+/* Prevent iOS 300ms tap delay and gesture cancellation on interactive elements.
+   Also covers <a> tags used as buttons on the play page — iOS Safari fires
+   native link clicks even when React's synthetic event delegation breaks in
+   Turbopack dev mode, so interactive <a href="#"> is the reliable pattern. */
+button, a { touch-action: manipulation; }
 
 /* Landing page button hover states */
 .btn-ghost:hover  { background: var(--bg-elev-2); }
