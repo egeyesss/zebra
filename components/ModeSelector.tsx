@@ -27,7 +27,7 @@ export function ModeSelector({ initialMode }: { initialMode: Mode }) {
     <>
       {/* Mode tabs */}
       <div
-        className="mt-9 mx-4 flex"
+        className="mx-4 flex"
         style={{
           boxShadow: "inset 0 0 0 1px var(--border)",
           borderRadius: "9999px",
@@ -41,7 +41,7 @@ export function ModeSelector({ initialMode }: { initialMode: Mode }) {
             style={{
               fontFamily: "inherit",
               fontSize: "15px",
-              padding: "13px 28px",
+              padding: "clamp(9px, 1.5dvh, 13px) 28px",
               background: mode === m ? "var(--bg-elev-2)" : "transparent",
               color: mode === m ? "var(--fg)" : "var(--fg-muted)",
               textDecoration: "none",
@@ -66,8 +66,8 @@ export function ModeSelector({ initialMode }: { initialMode: Mode }) {
 
       {/* Action links — <a> tags so they work on every browser */}
       <div
-        className="mt-6 mx-4 flex flex-wrap justify-center"
-        style={{ gap: "14px" }}
+        className="mx-4 flex flex-wrap justify-center"
+        style={{ gap: "14px", marginTop: "clamp(8px, 1.5dvh, 20px)" }}
       >
         <a
           href="#howto"
@@ -76,7 +76,7 @@ export function ModeSelector({ initialMode }: { initialMode: Mode }) {
             fontFamily: "inherit",
             fontSize: "16px",
             letterSpacing: "0.02em",
-            padding: "16px 40px",
+            padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
             background: "transparent",
             textDecoration: "none",
             boxShadow: "inset 0 0 0 1px var(--border)",
@@ -93,7 +93,7 @@ export function ModeSelector({ initialMode }: { initialMode: Mode }) {
             fontFamily: "inherit",
             fontSize: "16px",
             letterSpacing: "0.02em",
-            padding: "16px 40px",
+            padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
             color: "var(--accent-green)",
             boxShadow: "inset 0 0 0 1.5px var(--accent-green)",
             background: "rgba(109,191,109,0.08)",

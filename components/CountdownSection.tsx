@@ -74,27 +74,27 @@ export function CountdownSection({
     );
 
   return (
-    <div className="mt-14 text-center" style={{ lineHeight: 2 }}>
+    <div className="text-center" style={{ lineHeight: 1.7 }}>
       {date && (
         <div
           className="text-fg font-bold"
-          style={{ fontSize: "16px", letterSpacing: "0.04em" }}
+          style={{ fontSize: "clamp(12px, 1.8dvh, 16px)", letterSpacing: "0.04em" }}
         >
           {date}
         </div>
       )}
       {number !== null && (
-        <div className="text-fg-muted" style={{ fontSize: "15px" }}>
+        <div className="text-fg-muted" style={{ fontSize: "clamp(11px, 1.7dvh, 15px)" }}>
           No. {String(number).padStart(3, "0")}
         </div>
       )}
-      <div className="text-fg-muted" style={{ fontSize: "15px" }}>
+      <div className="text-fg-muted" style={{ fontSize: "clamp(11px, 1.7dvh, 15px)" }}>
         {modeLabel}
       </div>
       {countdown && (
         <div
-          className="text-fg-muted mt-2.5"
-          style={{ fontSize: "14px", opacity: 0.7, whiteSpace: "nowrap" }}
+          className="text-fg-muted mt-1"
+          style={{ fontSize: "clamp(10px, 1.6dvh, 14px)", opacity: 0.7, whiteSpace: "nowrap" }}
         >
           new puzzle in{" "}
           <b className="text-accent-amber font-normal">{countdown}</b>

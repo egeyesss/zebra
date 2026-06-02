@@ -176,7 +176,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
     : undefined;
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col lg:h-dvh">
       {/*
        * About modal — CSS :target pattern (zero JS, iOS Safari proof).
        * The Tailwind optimizer drops :target rules from globals.css, so the
@@ -302,8 +302,8 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
         </div>
       )}
 
-      <main className="flex flex-1 flex-col items-center gap-6 pt-4 px-4 pb-28 lg:flex-row lg:items-start lg:justify-center lg:pb-4">
-        <div className="flex w-full max-w-2xl flex-shrink-0 flex-col gap-3">
+      <main className="flex flex-1 flex-col items-center gap-6 pt-4 px-4 pb-28 lg:min-h-0 lg:flex-row lg:items-start lg:justify-center lg:pb-4">
+        <div className="relative flex w-full max-w-2xl flex-col gap-3">
           {!started ? (
             <div className="flex flex-col items-center gap-8 px-4 py-16">
               {questionText && (
@@ -345,7 +345,11 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
               />
 
               {pickerValues && (
-                <div ref={pickerRef} className="hidden lg:block">
+                <div
+                  ref={pickerRef}
+                  className="hidden lg:absolute lg:inset-x-0 lg:block lg:pt-3"
+                  style={{ top: "100%" }}
+                >
                   <CellPicker
                     values={pickerValues}
                     currentValue={pickerCurrentValue}
@@ -358,7 +362,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
         </div>
 
         {started && (
-          <aside className="border-border bg-bg-elev hidden w-64 flex-shrink-0 flex-col gap-3 rounded border p-4 lg:flex lg:max-h-[70vh]">
+          <aside className="border-border bg-bg-elev hidden flex-col gap-3 rounded border p-4 lg:flex lg:min-h-0 lg:self-stretch lg:w-80 xl:w-96">
             <h2 className="text-fg-muted text-xs tracking-widest uppercase">
               Clues
             </h2>
