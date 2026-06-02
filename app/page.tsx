@@ -157,16 +157,19 @@ export default async function LandingPage({
   return (
     <>
       <main
-        className="flex min-h-full flex-col items-center justify-center"
-        style={{ padding: "32px 24px 28px" }}
+        className="flex h-dvh flex-col items-center justify-center overflow-hidden"
+        style={{
+          padding: "clamp(12px, 2.5dvh, 32px) 24px",
+          gap: "clamp(4px, 1.5dvh, 12px)",
+        }}
       >
         <HeroGrid />
 
         <h1 className="lp-wordmark">z e b r a</h1>
 
         <p
-          className="mt-6 text-center text-fg-muted"
-          style={{ fontSize: "19px", lineHeight: 1.65, maxWidth: "48ch" }}
+          className="text-center text-fg-muted"
+          style={{ fontSize: "clamp(13px, 2dvh, 19px)", lineHeight: 1.5, maxWidth: "48ch" }}
         >
           Solve the daily logic grid.
           <br />
@@ -188,7 +191,7 @@ export default async function LandingPage({
         </Suspense>
 
         <div
-          className="mt-6 flex flex-col items-center gap-2"
+          className="flex flex-col items-center gap-2"
           style={{ fontSize: "13px" }}
         >
           <a

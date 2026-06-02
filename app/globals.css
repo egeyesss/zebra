@@ -65,10 +65,10 @@ button, a { touch-action: manipulation; }
    proportionally to avoid horizontal overflow on phones. */
 .lp-hero-grid {
   display: grid;
-  /* 122px on ≥580px, scales with vw in between, 76px floor for very small phones */
+  /* columns scale with viewport width, rows scale with viewport height */
   grid-template-columns: repeat(4, clamp(76px, 21vw, 122px));
-  grid-template-rows: repeat(4, clamp(52px, 14vw, 72px));
-  margin-bottom: 16px;
+  grid-template-rows: repeat(4, clamp(36px, 7dvh, 72px));
+  /* spacing handled by gap on the parent flex container */
 }
 
 .lp-cell-text {
