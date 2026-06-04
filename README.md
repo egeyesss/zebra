@@ -4,9 +4,9 @@ A daily competitive logic-grid puzzle — the Einstein ("zebra") riddle in a
 Wordle-style daily ritual. One fresh puzzle a day, solved against a hard timer,
 shared as a brutally honest stat line.
 
-Built for people who want raw numbers, not mascots: a new grid every day, two
-tracks (☕ Coffee 4×4, 🌊 Deep 5×5), commit-based input, and a score that is
-simply how many times you changed your mind. Zero overwrites is **Flawless**.
+Built for people who want raw numbers, not mascots: ☕ Coffee (4×4) is a daily
+challenge, 🌊 Deep (5×5) is a Friday-only bonus grid. Commit-based input, a score
+that is simply how many times you changed your mind. Zero overwrites is **Flawless**.
 
 > **Status:** scaffolding. The data layer, theme shell, and page skeletons are
 > in place. Solving, the timer, scoring, and share rendering come next. Puzzles

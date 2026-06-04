@@ -70,3 +70,13 @@ export function getPool(): ExportedPuzzle[] {
 export function getPuzzleById(id: string): ExportedPuzzle | undefined {
   return bundle.puzzles.find((p) => p.id === id);
 }
+
+/** The Coffee (4×4) puzzle pool, in schedule order. */
+export function getCoffeePool(): ExportedPuzzle[] {
+  return bundle.puzzles.filter((p) => p.size === 4);
+}
+
+/** The Deep (5×5) puzzle pool, in schedule order. */
+export function getDeepPool(): ExportedPuzzle[] {
+  return bundle.puzzles.filter((p) => p.size === 5);
+}

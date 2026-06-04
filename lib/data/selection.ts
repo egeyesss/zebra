@@ -58,6 +58,17 @@ export function puzzleNumber(at: Date = new Date()): number | null {
 }
 
 /**
+ * Returns true if the given instant falls on a Friday in the reset timezone.
+ * Deep (5×5) is a Friday-only bonus challenge; Coffee (4×4) runs daily.
+ */
+export function isFridayInToronto(at: Date = new Date()): boolean {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: RESET_TIMEZONE,
+    weekday: "long",
+  }).format(at) === "Friday";
+}
+
+/**
  * The puzzle scheduled for the given instant, or null if none is (before launch,
  * or after the bank is exhausted).
  */
@@ -69,5 +80,56 @@ export function selectDailyPuzzle(
   if (index < 0 || index >= pool.length) {
     return null;
   }
+  return pool[index];
+}
+
+/** Day of week (0=Sun…6=Sat) for LAUNCH_DATE in the reset timezone. */
+function launchDayOfWeek(): number {
+  const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const dow = new Intl.DateTimeFormat("en-US", {
+    timeZone: RESET_TIMEZONE,
+    weekday: "short",
+  // Use noon UTC to dodge any DST edge on the launch date.
+  }).format(new Date(`${LAUNCH_DATE}T12:00:00Z`));
+  return weekdays.indexOf(dow);
+}
+
+/**
+ * Zero-based index into the Deep (5×5) pool for the current Friday.
+ * Returns -1 if the instant is not a Friday in the reset timezone, falls
+ * before launch, or is before the first Friday on or after launch.
+ *
+ * Example: if launch is a Monday, the first Friday is day 4 → Deep #0.
+ * The following Friday is day 11 → Deep #1, and so on.
+ */
+export function deepPuzzleIndex(at: Date = new Date()): number {
+  if (!isFridayInToronto(at)) return -1;
+  const dIdx = dayIndex(at);
+  if (dIdx < 0) return -1;
+  const launchDow = launchDayOfWeek();
+  const firstFridayOffset = (5 - launchDow + 7) % 7;
+  if (dIdx < firstFridayOffset) return -1;
+  return Math.floor((dIdx - firstFridayOffset) / 7);
+}
+
+/**
+ * Human-facing Deep puzzle number ("Deep #N"), one-based.
+ * Returns null when today is not a Friday or no Friday has arrived yet.
+ */
+export function deepPuzzleNumber(at: Date = new Date()): number | null {
+  const index = deepPuzzleIndex(at);
+  return index < 0 ? null : index + 1;
+}
+
+/**
+ * The Deep puzzle scheduled for the given Friday, or null if none is
+ * (not a Friday, before launch, or the Deep bank is exhausted).
+ */
+export function selectDeepPuzzle(
+  pool: ExportedPuzzle[],
+  at: Date = new Date(),
+): ExportedPuzzle | null {
+  const index = deepPuzzleIndex(at);
+  if (index < 0 || index >= pool.length) return null;
   return pool[index];
 }

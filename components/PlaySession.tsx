@@ -221,11 +221,12 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
               commit each cell against the clock.
             </p>
             <p>
-              Two tracks:{" "}
-              <span className="text-fg-muted">☕ Coffee</span> is a 4×4
-              warm-up, <span className="text-fg-muted">🌊 Deep</span> is a 5×5
-              for when you mean it. Every commit is final and counts; your score
-              is the number of times you changed your mind. Zero overwrites is{" "}
+              <span className="text-fg-muted">☕ Coffee</span> is a 4×4 daily
+              challenge.{" "}
+              <span className="text-fg-muted">🌊 Deep</span> is a 5×5 bonus
+              grid, available every Friday. Every commit is final and counts;
+              your score is the number of times you changed your mind. Zero
+              overwrites is{" "}
               <span className="text-accent-green">Flawless</span>.
             </p>
             <p>
