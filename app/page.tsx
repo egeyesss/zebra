@@ -16,6 +16,7 @@ import { Suspense } from "react";
 import { CountdownSection } from "@/components/CountdownSection";
 import { EscapeClose } from "@/components/EscapeClose";
 import { ModeSelector } from "@/components/ModeSelector";
+import { isFridayInToronto } from "@/lib/data/selection";
 
 // ---------------------------------------------------------------------------
 // Decorative mid-solve hero grid (server-rendered, aria-hidden)
@@ -124,8 +125,8 @@ const RULES: { marker: string; color?: string; body: React.ReactNode }[] = [
     body: (
       <>
         Beat the clock.{" "}
-        <span className="text-fg-muted">10:00 Coffee · 25:00 Deep.</span> Hit
-        the cap and it&apos;s a <b>DNF</b>.
+        <span className="text-fg-muted">10:00 Coffee · 25:00 Deep.</span>{" "}
+        Hit the cap and it&apos;s a <b>DNF</b>.
       </>
     ),
   },
@@ -153,6 +154,7 @@ export default async function LandingPage({
 }) {
   const params = await searchParams;
   const mode: Mode = params.mode === "coffee" ? "coffee" : "deep";
+  const isFriday = isFridayInToronto();
 
   return (
     <>
@@ -174,7 +176,7 @@ export default async function LandingPage({
           Solve the daily logic grid.
           <br />
           <b className="text-fg font-medium">
-            No hints, no undo — every commit is final.
+            No hints, no undo. Every commit is final.
           </b>
         </p>
 
@@ -182,12 +184,12 @@ export default async function LandingPage({
             uses history.replaceState() instead of a full page reload. The
             server-rendered initialMode sets the correct active state on first
             paint; after that, mode state lives in the component. */}
-        <ModeSelector initialMode={mode} />
+        <ModeSelector initialMode={mode} isFriday={isFriday} />
 
         {/* Countdown section — client component. Shows date + live countdown.
             Falls back to an empty space if JS doesn't load (page still usable). */}
         <Suspense fallback={<div className="mt-14" style={{ height: "112px" }} />}>
-          <CountdownSection initialMode={mode} />
+          <CountdownSection initialMode={mode} isFriday={isFriday} />
         </Suspense>
 
         <div

@@ -12,7 +12,13 @@ type Mode = "coffee" | "deep";
  * e.preventDefault() + history.replaceState() to update the URL in place,
  * then fire a "zebra:mode" CustomEvent so CountdownSection can sync its label.
  */
-export function ModeSelector({ initialMode }: { initialMode: Mode }) {
+export function ModeSelector({
+  initialMode,
+  isFriday,
+}: {
+  initialMode: Mode;
+  isFriday: boolean;
+}) {
   const [mode, setMode] = useState<Mode>(initialMode);
 
   function pick(m: Mode, e: React.MouseEvent<HTMLAnchorElement>) {
@@ -22,6 +28,8 @@ export function ModeSelector({ initialMode }: { initialMode: Mode }) {
     history.replaceState(null, "", `/?mode=${m}`);
     window.dispatchEvent(new CustomEvent("zebra:mode", { detail: m }));
   }
+
+  const deepUnavailable = mode === "deep" && !isFriday;
 
   return (
     <>
@@ -58,13 +66,26 @@ export function ModeSelector({ initialMode }: { initialMode: Mode }) {
             {m === "coffee" ? (
               <><span style={{ fontSize: "1.3em", marginRight: "0.35em" }}>☕️</span>Coffee · 4 × 4</>
             ) : (
-              <><span style={{ fontSize: "1.3em", marginRight: "0.35em" }}>🌊</span>Deep · 5 × 5</>
+              <>
+                <span style={{ fontSize: "1.3em", marginRight: "0.35em" }}>🌊</span>
+                Deep · 5 × 5
+                <span
+                  style={{
+                    fontSize: "11px",
+                    marginLeft: "0.4em",
+                    opacity: 0.55,
+                    letterSpacing: "0.08em",
+                  }}
+                >
+                  · Fri
+                </span>
+              </>
             )}
           </a>
         ))}
       </div>
 
-      {/* Action links — <a> tags so they work on every browser */}
+      {/* Action links */}
       <div
         className="mx-4 flex flex-wrap justify-center"
         style={{ gap: "14px", marginTop: "clamp(8px, 1.5dvh, 20px)" }}
@@ -86,24 +107,44 @@ export function ModeSelector({ initialMode }: { initialMode: Mode }) {
         >
           how to play
         </a>
-        <a
-          href={`/play?mode=${mode}`}
-          className="btn-play rounded-full transition-colors"
-          style={{
-            fontFamily: "inherit",
-            fontSize: "16px",
-            letterSpacing: "0.02em",
-            padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
-            color: "var(--accent-green)",
-            boxShadow: "inset 0 0 0 1.5px var(--accent-green)",
-            background: "rgba(109,191,109,0.08)",
-            textDecoration: "none",
-            display: "inline-flex",
-            alignItems: "center",
-          }}
-        >
-          play
-        </a>
+        {deepUnavailable ? (
+          <span
+            style={{
+              fontFamily: "inherit",
+              fontSize: "16px",
+              letterSpacing: "0.02em",
+              padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
+              color: "var(--fg-muted)",
+              boxShadow: "inset 0 0 0 1.5px var(--border)",
+              opacity: 0.4,
+              borderRadius: "9999px",
+              display: "inline-flex",
+              alignItems: "center",
+              cursor: "default",
+            }}
+          >
+            Fridays only
+          </span>
+        ) : (
+          <a
+            href={`/play?mode=${mode}`}
+            className="btn-play rounded-full transition-colors"
+            style={{
+              fontFamily: "inherit",
+              fontSize: "16px",
+              letterSpacing: "0.02em",
+              padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
+              color: "var(--accent-green)",
+              boxShadow: "inset 0 0 0 1.5px var(--accent-green)",
+              background: "rgba(109,191,109,0.08)",
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+            }}
+          >
+            play
+          </a>
+        )}
       </div>
     </>
   );
