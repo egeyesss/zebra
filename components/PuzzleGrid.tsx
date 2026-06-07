@@ -11,6 +11,8 @@ interface Props {
   overwrittenCells: Set<string>;
   justCommitted: string | null;
   onCellSelect: (category: string, position: number) => void;
+
+  notes: Record<string, Set<string>>;
 }
 
 export function PuzzleGrid({
@@ -20,6 +22,7 @@ export function PuzzleGrid({
   overwrittenCells,
   justCommitted,
   onCellSelect,
+  notes,
 }: Props) {
   const categories = Object.keys(puzzle.theme.attributes);
   const positions = Array.from({ length: puzzle.size }, (_, i) => i + 1);
@@ -84,6 +87,11 @@ export function PuzzleGrid({
               selected?.category === category && selected?.position === pos;
             const isOverwritten = overwrittenCells.has(key);
             const isFlashing = justCommitted === key;
+            const cellNotes = notes[key] ?? null;
+            const eliminatedList =
+              cellNotes && cellNotes.size > 0
+                ? Array.from(cellNotes)
+                : null;
 
             return (
               // href="#" makes the element natively clickable on iOS Safari;
@@ -115,6 +123,30 @@ export function PuzzleGrid({
                     className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
                     style={{ backgroundColor: "var(--accent-red)" }}
                   />
+                )}
+                {eliminatedList && (
+                  <div
+                    className="absolute bottom-0 left-0 right-0 flex flex-wrap px-0.5 pb-0.5"
+                    style={{ gap: "1px" }}
+                  >
+                    {eliminatedList.map((noteVal) => (
+                      <span
+                        key={noteVal}
+                        className="text-[7px] lg:text-[10px]"
+                        style={{
+                          lineHeight: 1.2,
+                          color: "var(--accent-red)",
+                          textDecoration: "line-through",
+                          textDecorationColor: "var(--accent-red)",
+                          overflow: "hidden",
+                          maxWidth: "100%",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {noteVal}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </a>
             );
