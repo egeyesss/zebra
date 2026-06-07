@@ -66,6 +66,8 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const [solved, setSolved] = useState(false);
   const [finalTime, setFinalTime] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [noteMode, setNoteMode] = useState(false);
+  const [notes, setNotes] = useState<Record<string, Set<string>>>({});
 
   const { hardCapSeconds } = TRACKS[track];
 
@@ -112,6 +114,14 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  // Dismiss the cell picker whenever the about modal opens or closes so the
+  // picker never floats over the overlay.
+  useEffect(() => {
+    const handler = () => setSelected(null);
+    window.addEventListener("hashchange", handler);
+    return () => window.removeEventListener("hashchange", handler);
   }, []);
 
   useEffect(() => {
@@ -180,6 +190,21 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
     }
   }
 
+  function handleToggleNote(value: string) {
+    if (!selected || !started || dnf || solved) return;
+    const key = `${selected.category}:${selected.position}`;
+    setNotes((prev) => {
+      const next = new Set(prev[key] ?? []);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return { ...prev, [key]: next };
+    });
+    // Deliberately no setSelected(null) — keep cell selected for multi-elimination
+  }
+
   const pickerRef = useRef<HTMLDivElement>(null);
 
   // Scroll the desktop picker into view when a cell is selected.
@@ -194,6 +219,9 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const pickerValues = selected ? shuffledAttributes[selected.category] : null;
   const pickerCurrentValue = selected
     ? committed[`${selected.category}:${selected.position}`]
+    : undefined;
+  const pickerEliminatedValues = selected
+    ? notes[`${selected.category}:${selected.position}`]
     : undefined;
 
   return (
@@ -286,9 +314,57 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
           onDnf={handleDnf}
           onFinish={handleFinish}
         />
-        <div className="text-fg-muted flex items-center gap-3 text-sm">
-          {number !== null && <span className="tabular-nums">#{number}</span>}
-          <TrackBadge track={track} />
+        <div className="flex w-full items-center justify-between text-sm lg:w-auto lg:justify-center lg:gap-3">
+          {/* Left: eliminate toggle — mobile only */}
+          <div className="lg:hidden">
+            {started ? (
+              <button
+                onClick={() => setNoteMode((n) => !n)}
+                className="px-2 py-1 text-[10px] rounded-full transition-colors"
+                style={{
+                  background: noteMode ? "rgba(212,160,64,0.12)" : "transparent",
+                  border: `1px solid ${noteMode ? "var(--accent-amber)" : "var(--border)"}`,
+                  color: noteMode ? "var(--accent-amber)" : "var(--fg-muted)",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  letterSpacing: "0.06em",
+                }}
+                aria-pressed={noteMode}
+                aria-label={noteMode ? "Exit eliminate mode" : "Enter eliminate mode"}
+              >
+                ✎ eliminate
+              </button>
+            ) : (
+              <div className="px-2 py-1 text-[10px] invisible" aria-hidden="true">✎ eliminate</div>
+            )}
+          </div>
+
+          {/* Center: puzzle number + track */}
+          <div className="text-fg-muted flex items-center gap-3">
+            {number !== null && <span className="tabular-nums">#{number}</span>}
+            <TrackBadge track={track} />
+          </div>
+
+          {/* Right: check button — mobile only. TODO: wire up check-my-work feature */}
+          <div className="lg:hidden">
+            {started ? (
+              <button
+                className="px-2 py-1 text-[10px] rounded-full"
+                style={{
+                  background: "transparent",
+                  border: "1px solid var(--accent-green)",
+                  color: "var(--accent-green)",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  letterSpacing: "0.06em",
+                }}
+              >
+                check (1)
+              </button>
+            ) : (
+              <div className="px-2 py-1 text-[10px] invisible" aria-hidden="true">check (1)</div>
+            )}
+          </div>
         </div>
         {questionText && <p className="text-fg text-sm">{questionText}</p>}
       </header>
@@ -352,6 +428,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
                 overwrittenCells={overwrittenCells}
                 justCommitted={justCommitted}
                 onCellSelect={handleCellSelect}
+                notes={notes}
               />
 
               {pickerValues && (
@@ -364,6 +441,9 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
                     values={pickerValues}
                     currentValue={pickerCurrentValue}
                     onCommit={handleCommit}
+                    noteMode={noteMode}
+                    eliminatedValues={pickerEliminatedValues}
+                    onToggleNote={handleToggleNote}
                   />
                 </div>
               )}
@@ -390,7 +470,45 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
             values={pickerValues}
             currentValue={pickerCurrentValue}
             onCommit={handleCommit}
+            noteMode={noteMode}
+            eliminatedValues={pickerEliminatedValues}
+            onToggleNote={handleToggleNote}
           />
+        </div>
+      )}
+
+      {started && (
+        <div className="hidden lg:flex fixed z-50 bottom-6 right-6 flex-col items-stretch gap-3">
+          <button
+            onClick={() => setNoteMode((n) => !n)}
+            className="px-5 py-2.5 text-[19px] rounded-full transition-colors"
+            style={{
+              background: noteMode ? "rgba(212,160,64,0.12)" : "transparent",
+              border: `1px solid ${noteMode ? "var(--accent-amber)" : "var(--border)"}`,
+              color: noteMode ? "var(--accent-amber)" : "var(--fg-muted)",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              letterSpacing: "0.06em",
+            }}
+            aria-pressed={noteMode}
+            aria-label={noteMode ? "Exit eliminate mode" : "Enter eliminate mode"}
+          >
+            ✎ eliminate
+          </button>
+          {/* TODO: wire up check-my-work feature */}
+          <button
+            className="px-5 py-2.5 text-[19px] rounded-full"
+            style={{
+              background: "transparent",
+              border: "1.5px solid var(--accent-green)",
+              color: "var(--accent-green)",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              letterSpacing: "0.06em",
+            }}
+          >
+            check (1)
+          </button>
         </div>
       )}
 
