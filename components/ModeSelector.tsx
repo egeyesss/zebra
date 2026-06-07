@@ -35,8 +35,9 @@ export function ModeSelector({
     <>
       {/* Mode tabs */}
       <div
-        className="mx-4 flex"
+        className="w-full flex"
         style={{
+          maxWidth: "480px",
           boxShadow: "inset 0 0 0 1px var(--border)",
           borderRadius: "9999px",
         }}
