@@ -11,6 +11,7 @@ import { ClueDrawer } from "./ClueDrawer";
 import { CluePanel } from "./CluePanel";
 import { Hud } from "./Hud";
 import { PuzzleGrid } from "./PuzzleGrid";
+import { ResultScreen } from "./ResultScreen";
 import { TrackBadge } from "./TrackBadge";
 import { Wordmark } from "./Wordmark";
 
@@ -62,14 +63,35 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   );
   const [overwrites, setOverwrites] = useState(0);
   const [justCommitted, setJustCommitted] = useState<string | null>(null);
-  // TODO: wire solved → result-screen overlay (result-screen session)
   const [solved, setSolved] = useState(false);
+  const [finalTime, setFinalTime] = useState<number | null>(null);
+  const [showResult, setShowResult] = useState(false);
 
   const { hardCapSeconds } = TRACKS[track];
 
   function handleDnf() {
     setDnf(true);
     setSelected(null);
+  }
+
+  function handleFinish(elapsedSeconds: number) {
+    setFinalTime(elapsedSeconds);
+    // Small delay so the player sees their last commit flash before the overlay appears.
+    setTimeout(() => setShowResult(true), 600);
+  }
+
+  function handleViewSolution() {
+    setShowResult(false);
+    // Fill in the correct solution so the player can see the full grid.
+    const solution: Record<string, string> = {};
+    const categories = Object.keys(puzzle.theme.attributes);
+    for (const cat of categories) {
+      const vals = puzzle.solution.assignments[cat] ?? [];
+      vals.forEach((val, i) => {
+        solution[`${cat}:${i + 1}`] = val;
+      });
+    }
+    setCommitted(solution);
   }
 
   const questionText = buildQuestionText(puzzle);
@@ -155,7 +177,6 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
 
     if (checkSolved(next, puzzle)) {
       setSolved(true);
-      // TODO: replace with full result-screen overlay (result-screen session)
     }
   }
 
@@ -263,6 +284,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
           hardCapSeconds={hardCapSeconds}
           overwrites={overwrites}
           onDnf={handleDnf}
+          onFinish={handleFinish}
         />
         <div className="text-fg-muted flex items-center gap-3 text-sm">
           {number !== null && <span className="tabular-nums">#{number}</span>}
@@ -278,29 +300,16 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
         </p>
       )}
 
-      {/* TODO: replace both banners with the full result-screen overlay (result-screen session). */}
-      {solved && (
-        <div
-          className="border-b px-4 py-3 text-center text-sm"
-          style={{
-            backgroundColor: "rgba(109,191,109,0.08)",
-            borderColor: "rgba(109,191,109,0.25)",
-          }}
-        >
-          <span style={{ color: "var(--accent-green)" }}>Solved.</span>
-        </div>
-      )}
-      {dnf && !solved && (
-        <div
-          className="border-b px-4 py-3 text-center text-sm"
-          style={{
-            backgroundColor: "rgba(207,84,84,0.08)",
-            borderColor: "rgba(207,84,84,0.25)",
-          }}
-        >
-          {/* TODO: replace with full result-screen overlay (result-screen session) */}
-          <span style={{ color: "var(--accent-red)" }}>DNF.</span>
-        </div>
+      {showResult && finalTime !== null && (
+        <ResultScreen
+          mode={solved ? "win" : "dnf"}
+          track={track}
+          number={number}
+          elapsedSeconds={finalTime}
+          overwrites={overwrites}
+          cellsFilled={Object.keys(committed).length}
+          onViewSolution={handleViewSolution}
+        />
       )}
 
       <main className="flex flex-1 flex-col items-center gap-6 pt-4 px-4 pb-28 lg:min-h-0 lg:flex-row lg:items-start lg:justify-center lg:pb-4">

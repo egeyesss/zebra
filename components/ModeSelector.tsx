@@ -35,8 +35,9 @@ export function ModeSelector({
     <>
       {/* Mode tabs */}
       <div
-        className="mx-4 flex"
+        className="w-full flex"
         style={{
+          maxWidth: "480px",
           boxShadow: "inset 0 0 0 1px var(--border)",
           borderRadius: "9999px",
         }}
@@ -49,7 +50,7 @@ export function ModeSelector({
             style={{
               fontFamily: "inherit",
               fontSize: "15px",
-              padding: "clamp(9px, 1.5dvh, 13px) 28px",
+              padding: "clamp(9px, 1.5dvh, 13px) clamp(12px, 3.5vw, 28px)",
               background: mode === m ? "var(--bg-elev-2)" : "transparent",
               color: mode === m ? "var(--fg)" : "var(--fg-muted)",
               textDecoration: "none",
@@ -70,6 +71,7 @@ export function ModeSelector({
                 <span style={{ fontSize: "1.3em", marginRight: "0.35em" }}>🌊</span>
                 Deep · 5 × 5
                 <span
+                  className="hidden sm:inline"
                   style={{
                     fontSize: "11px",
                     marginLeft: "0.4em",

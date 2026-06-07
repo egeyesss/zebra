@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 interface Props {
   started: boolean;
@@ -9,6 +9,8 @@ interface Props {
   hardCapSeconds: number;
   overwrites: number;
   onDnf: () => void;
+  /** Called once when the timer freezes (win or DNF), with the final elapsed seconds. */
+  onFinish?: (elapsedSeconds: number) => void;
 }
 
 function formatTime(s: number): string {
@@ -23,14 +25,23 @@ export function Hud({
   hardCapSeconds,
   overwrites,
   onDnf,
+  onFinish,
 }: Props) {
   const [elapsed, setElapsed] = useState(0);
   const dnfFiredRef = useRef(false);
-  // Always hold latest onDnf without re-registering the interval.
+  const finishFiredRef = useRef(false);
+  // Always hold latest callbacks without re-registering the interval.
   const onDnfRef = useRef(onDnf);
   useEffect(() => {
     onDnfRef.current = onDnf;
   });
+  // Live ref so the onFinish effect always reads the current elapsed value.
+  // useLayoutEffect (not render assignment) satisfies react-hooks/refs; layout
+  // effects run before regular effects, so the ref is fresh when stopped fires.
+  const elapsedRef = useRef(0);
+  useLayoutEffect(() => {
+    elapsedRef.current = elapsed;
+  }, [elapsed]);
 
   const stopped = solved || dnf;
 
@@ -51,6 +62,13 @@ export function Hud({
     dnfFiredRef.current = true;
     onDnfRef.current();
   }, [elapsed, hardCapSeconds, started, stopped]);
+
+  // Fire onFinish exactly once when the timer freezes (win or DNF).
+  useEffect(() => {
+    if (!stopped || finishFiredRef.current) return;
+    finishFiredRef.current = true;
+    onFinish?.(elapsedRef.current);
+  }, [stopped, onFinish]);
 
   const pct = hardCapSeconds > 0 ? elapsed / hardCapSeconds : 0;
   let timerColor: string;
