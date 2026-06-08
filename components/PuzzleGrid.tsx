@@ -128,7 +128,20 @@ export function PuzzleGrid({
                   style={cellStyle}
                 >
                   {value && (
-                    <span className="text-fg text-xs leading-tight text-center px-1 break-all">
+                    <span
+                      className="text-xs leading-tight text-center px-1 break-all"
+                      style={
+                        isCheckedCell
+                          ? checkedCell!.correct
+                            ? { color: "var(--accent-green)" }
+                            : {
+                                color: "var(--accent-red)",
+                                textDecoration: "line-through",
+                                textDecorationColor: "var(--accent-red)",
+                              }
+                          : { color: "var(--fg)" }
+                      }
+                    >
                       {value}
                     </span>
                   )}
