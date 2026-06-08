@@ -1,12 +1,12 @@
 # Zebra
 
-A daily competitive logic-grid puzzle — the Einstein ("zebra") riddle as a
-Wordle-style daily ritual. One fresh puzzle a day, solved against a hard timer,
-shared as a brutally honest stat line.
+A daily competitive logic-grid puzzle. the Einstein ("zebra") riddle as a
+Wordle style daily mind game. One fresh puzzle a day, solved against a hard timer,
+shared as a honest stat line in the same style as Wordle.
 
-Built for people who want raw numbers, not mascots.
+Built for people who want to wake up their mind in the morning with puzzles.
 
-**→ [zebra.xyz](https://zebra.xyz)**
+**→ website coming soon**
 
 ---
 
