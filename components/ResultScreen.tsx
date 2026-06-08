@@ -190,7 +190,7 @@ export function ResultScreen({
             <div
               className="tabular-nums font-bold"
               style={{
-                fontSize: "clamp(40px, 10vw, 62px)",
+                fontSize: "clamp(26px, 7vw, 40px)",
                 color: heroColor,
                 lineHeight: 1,
               }}
