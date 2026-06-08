@@ -70,7 +70,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const [notes, setNotes] = useState<Record<string, Set<string>>>({});
   const [checkMode, setCheckMode] = useState(false);
   const [checkUsed, setCheckUsed] = useState(false);
-  const [checkedCell, setCheckedCell] = useState<{ key: string; correct: boolean } | null>(null);
+  const [checkedCell, setCheckedCell] = useState<{ key: string; value: string; correct: boolean } | null>(null);
 
   // Category of the puzzle's hidden answer — checking any cell in this row
   // would let the player eliminate options to find the answer, so it's blocked.
@@ -162,7 +162,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
       if (!committed[key]) return; // must tap a committed cell
       const correct =
         committed[key] === puzzle.solution.assignments[category]?.[position - 1];
-      setCheckedCell({ key, correct });
+      setCheckedCell({ key, value: committed[key], correct });
       setCheckUsed(true);
       setCheckMode(false);
       return;
@@ -250,8 +250,11 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
     ? notes[`${selected.category}:${selected.position}`]
     : undefined;
   const pickerCheckedValue =
-    selected && checkedCell && `${selected.category}:${selected.position}` === checkedCell.key
-      ? { value: committed[checkedCell.key], correct: checkedCell.correct }
+    selected &&
+    checkedCell &&
+    `${selected.category}:${selected.position}` === checkedCell.key &&
+    committed[checkedCell.key] === checkedCell.value
+      ? { value: checkedCell.value, correct: checkedCell.correct }
       : undefined;
 
   return (
