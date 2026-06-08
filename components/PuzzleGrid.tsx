@@ -14,7 +14,7 @@ interface Props {
   notes: Record<string, Set<string>>;
   checkMode?: boolean;
   questionCategory?: string;
-  checkedCell?: { key: string; correct: boolean };
+  checkedCell?: { key: string; value: string; correct: boolean };
 }
 
 export function PuzzleGrid({
@@ -97,7 +97,7 @@ export function PuzzleGrid({
                 selected?.category === category && selected?.position === pos;
               const isOverwritten = overwrittenCells.has(key);
               const isFlashing = justCommitted === key;
-              const isCheckedCell = checkedCell?.key === key;
+              const isCheckedCell = checkedCell?.key === key && value === checkedCell.value;
               const cellNotes = notes[key] ?? null;
               const eliminatedList =
                 cellNotes && cellNotes.size > 0
