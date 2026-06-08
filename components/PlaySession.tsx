@@ -250,10 +250,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
     ? notes[`${selected.category}:${selected.position}`]
     : undefined;
   const pickerCheckedValue =
-    selected &&
-    checkedCell &&
-    `${selected.category}:${selected.position}` === checkedCell.key &&
-    committed[checkedCell.key] === checkedCell.value
+    selected && checkedCell && `${selected.category}:${selected.position}` === checkedCell.key
       ? { value: checkedCell.value, correct: checkedCell.correct }
       : undefined;
 
