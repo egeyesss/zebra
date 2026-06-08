@@ -55,6 +55,8 @@ interface Props {
   elapsedSeconds: number;
   overwrites: number;
   cellsFilled: number;
+  /** Whether the player used their one-time cell check. Stored here for future result screen display. */
+  checkUsed: boolean;
   onViewSolution: () => void;
 }
 

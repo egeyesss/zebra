@@ -11,8 +11,10 @@ interface Props {
   overwrittenCells: Set<string>;
   justCommitted: string | null;
   onCellSelect: (category: string, position: number) => void;
-
   notes: Record<string, Set<string>>;
+  checkMode?: boolean;
+  questionCategory?: string;
+  checkedCell?: { key: string; correct: boolean };
 }
 
 export function PuzzleGrid({
@@ -23,6 +25,9 @@ export function PuzzleGrid({
   justCommitted,
   onCellSelect,
   notes,
+  checkMode = false,
+  questionCategory,
+  checkedCell,
 }: Props) {
   const categories = Object.keys(puzzle.theme.attributes);
   const positions = Array.from({ length: puzzle.size }, (_, i) => i + 1);
@@ -75,84 +80,107 @@ export function PuzzleGrid({
       ))}
 
       {/* One row per attribute category — Fragment avoids display:contents WebKit bugs */}
-      {categories.map((category) => (
-        <Fragment key={category}>
-          <div className="bg-bg-elev text-fg-muted px-2 py-3 capitalize">
-            {category}
-          </div>
-          {positions.map((pos) => {
-            const key = `${category}:${pos}`;
-            const value = committed[key];
-            const isSelected =
-              selected?.category === category && selected?.position === pos;
-            const isOverwritten = overwrittenCells.has(key);
-            const isFlashing = justCommitted === key;
-            const cellNotes = notes[key] ?? null;
-            const eliminatedList =
-              cellNotes && cellNotes.size > 0
-                ? Array.from(cellNotes)
-                : null;
+      {categories.map((category) => {
+        const isBlockedRow = checkMode && category === questionCategory;
+        return (
+          <Fragment key={category}>
+            <div
+              className="bg-bg-elev text-fg-muted px-2 py-3 capitalize"
+              style={isBlockedRow ? { opacity: 0.3 } : undefined}
+            >
+              {category}
+            </div>
+            {positions.map((pos) => {
+              const key = `${category}:${pos}`;
+              const value = committed[key];
+              const isSelected =
+                selected?.category === category && selected?.position === pos;
+              const isOverwritten = overwrittenCells.has(key);
+              const isFlashing = justCommitted === key;
+              const isCheckedCell = checkedCell?.key === key;
+              const cellNotes = notes[key] ?? null;
+              const eliminatedList =
+                cellNotes && cellNotes.size > 0
+                  ? Array.from(cellNotes)
+                  : null;
 
-            return (
-              // href="#" makes the element natively clickable on iOS Safari;
-              // e.preventDefault() in the container's native handler stops hash nav.
-              <a
-                key={key}
-                href="#"
-                role="button"
-                aria-pressed={isSelected}
-                data-cat={category}
-                data-pos={String(pos)}
-                className={[
-                  "aspect-square min-h-12 flex items-center justify-center relative",
-                  isFlashing ? "cell-flash" : "bg-bg-elev-2",
-                ].join(" ")}
-                style={
-                  isSelected && !isFlashing
-                    ? { boxShadow: "inset 0 0 0 1.5px var(--accent-amber)" }
-                    : undefined
-                }
-              >
-                {value && (
-                  <span className="text-fg text-xs leading-tight text-center px-1 break-all">
-                    {value}
-                  </span>
-                )}
-                {isOverwritten && (
-                  <span
-                    className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
-                    style={{ backgroundColor: "var(--accent-red)" }}
-                  />
-                )}
-                {eliminatedList && (
-                  <div
-                    className="absolute bottom-0 left-0 right-0 flex flex-wrap px-0.5 pb-0.5"
-                    style={{ gap: "1px" }}
-                  >
-                    {eliminatedList.map((noteVal) => (
-                      <span
-                        key={noteVal}
-                        className="text-[7px] lg:text-[10px]"
-                        style={{
-                          lineHeight: 1.2,
-                          color: "var(--accent-red)",
-                          textDecoration: "line-through",
-                          textDecorationColor: "var(--accent-red)",
-                          overflow: "hidden",
-                          maxWidth: "100%",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {noteVal}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </a>
-            );
-          })}
-        </Fragment>
-      ))}
+              let cellStyle: React.CSSProperties | undefined;
+              if (isBlockedRow) {
+                cellStyle = { opacity: 0.3, cursor: "not-allowed" };
+              } else if (isSelected && !isFlashing) {
+                cellStyle = { boxShadow: "inset 0 0 0 1.5px var(--accent-amber)" };
+              }
+
+              return (
+                // href="#" makes the element natively clickable on iOS Safari;
+                // e.preventDefault() in the container's native handler stops hash nav.
+                <a
+                  key={key}
+                  href="#"
+                  role="button"
+                  aria-pressed={isSelected}
+                  data-cat={category}
+                  data-pos={String(pos)}
+                  className={[
+                    "aspect-square min-h-12 flex items-center justify-center relative",
+                    isFlashing ? "cell-flash" : "bg-bg-elev-2",
+                  ].join(" ")}
+                  style={cellStyle}
+                >
+                  {value && (
+                    <span className="text-fg text-xs leading-tight text-center px-1 break-all">
+                      {value}
+                    </span>
+                  )}
+                  {isOverwritten && (
+                    <span
+                      className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
+                      style={{ backgroundColor: "var(--accent-red)" }}
+                    />
+                  )}
+                  {isCheckedCell && (
+                    <span
+                      className="absolute bottom-1 left-1 font-bold leading-none"
+                      style={{
+                        fontSize: "11px",
+                        color: checkedCell!.correct
+                          ? "var(--accent-green)"
+                          : "var(--accent-red)",
+                      }}
+                    >
+                      {checkedCell!.correct ? "✓" : "✗"}
+                    </span>
+                  )}
+                  {eliminatedList && (
+                    <div
+                      className="absolute bottom-0 left-0 right-0 flex flex-wrap px-0.5 pb-0.5"
+                      style={{ gap: "1px" }}
+                    >
+                      {eliminatedList.map((noteVal) => (
+                        <span
+                          key={noteVal}
+                          className="text-[7px] lg:text-[10px]"
+                          style={{
+                            lineHeight: 1.2,
+                            color: "var(--accent-red)",
+                            textDecoration: "line-through",
+                            textDecorationColor: "var(--accent-red)",
+                            overflow: "hidden",
+                            maxWidth: "100%",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {noteVal}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </a>
+              );
+            })}
+          </Fragment>
+        );
+      })}
     </div>
   );
 }
