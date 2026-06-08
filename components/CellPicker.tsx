@@ -9,6 +9,8 @@ interface Props {
   noteMode?: boolean;
   eliminatedValues?: Set<string>;
   onToggleNote?: (value: string) => void;
+  /** If the committed value in this cell was verified by check, carry the result so the picker can style it. */
+  checkedValue?: { value: string; correct: boolean };
 }
 
 export function CellPicker({
@@ -18,6 +20,7 @@ export function CellPicker({
   noteMode = false,
   eliminatedValues,
   onToggleNote,
+  checkedValue,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const onCommitRef = useRef(onCommit);
@@ -58,6 +61,26 @@ export function CellPicker({
       {values.map((v) => {
         const isCommitted = v === currentValue;
         const isEliminated = eliminatedValues?.has(v) ?? false;
+        const isCheckedWrong = v === checkedValue?.value && !checkedValue.correct;
+        const isCheckedCorrect = v === checkedValue?.value && checkedValue.correct;
+
+        let color: string;
+        let textDecoration = "none";
+        let textDecorationColor: string | undefined;
+
+        if (isCheckedWrong) {
+          color = "var(--accent-red)";
+          textDecoration = "line-through";
+          textDecorationColor = "var(--accent-red)";
+        } else if (isEliminated) {
+          color = "var(--accent-red)";
+          textDecoration = "line-through";
+          textDecorationColor = "var(--accent-red)";
+        } else if (isCommitted || isCheckedCorrect) {
+          color = "var(--accent-green)";
+        } else {
+          color = "var(--fg)";
+        }
 
         return (
           <a
@@ -66,19 +89,9 @@ export function CellPicker({
             role="button"
             data-value={v}
             className="px-2 py-1 text-sm rounded flex items-center gap-1 transition-colors hover:bg-bg-elev-2"
-            style={{
-              color: isEliminated
-                ? "var(--accent-red)"
-                : isCommitted
-                  ? "var(--accent-green)"
-                  : "var(--fg)",
-              textDecoration: isEliminated ? "line-through" : "none",
-              textDecorationColor: isEliminated
-                ? "var(--accent-red)"
-                : undefined,
-            }}
+            style={{ color, textDecoration, textDecorationColor }}
           >
-            {isCommitted && !noteMode && (
+            {isCommitted && !noteMode && !isCheckedWrong && (
               <span style={{ color: "var(--accent-green)" }}>●</span>
             )}
             {v}
