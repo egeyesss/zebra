@@ -1,12 +1,11 @@
 # Zebra
 
-A daily competitive logic-grid puzzle. the Einstein ("zebra") riddle as a
-Wordle style daily mind game. One fresh puzzle a day, solved against a hard timer,
-shared as a honest stat line in the same style as Wordle.
+The Einstein ("zebra") riddle as a daily puzzle. One per day, one hard timer,
+one score: how many times you changed a committed cell. Zero is Flawless.
 
-Built for people who want to wake up their mind in the morning with puzzles.
+Good for waking your brain up in the morning.
 
-**→ website coming soon**
+**website coming soon**
 
 ---
 
@@ -19,14 +18,14 @@ Built for people who want to wake up their mind in the morning with puzzles.
   </tr>
   <tr>
     <td><img src="public/screenshots/landing-desktop.png" width="480" alt="Landing page" /></td>
-    <td><img src="public/screenshots/puzzle-inplay-desktop.png" width="480" alt="Puzzle in play — desktop" /></td>
+    <td><img src="public/screenshots/puzzle-inplay-desktop.png" width="480" alt="Puzzle in play on desktop" /></td>
   </tr>
   <tr>
     <td align="center"><b>Puzzle (mobile)</b></td>
     <td align="center"></td>
   </tr>
   <tr>
-    <td><img src="public/screenshots/puzzle-inplay-mobile.png" width="240" alt="Puzzle in play — mobile" /></td>
+    <td><img src="public/screenshots/puzzle-inplay-mobile.png" width="240" alt="Puzzle in play on mobile" /></td>
     <td></td>
   </tr>
 </table>
@@ -35,13 +34,11 @@ Built for people who want to wake up their mind in the morning with puzzles.
 
 ## How it works
 
-Each day delivers one puzzle. Read the clues, fill the grid, commit your
-answers. The timer starts when you do and stops when you submit or the clock
-runs out.
+You get one puzzle per day. Read the clues, fill the grid, and submit before the
+clock runs out. The timer starts when you click start.
 
-**Scoring** is a single number: how many times you changed a committed cell.
-Zero is **Flawless**. No partial credit, no streaks displayed in-game — just
-the raw result.
+Scoring is just the overwrite count: how many times you changed a cell after
+committing a value. No streaks shown in-game, no partial credit.
 
 **Tracks**
 
@@ -52,39 +49,38 @@ the raw result.
 
 **Input modes**
 
-- **Commit** — tap a cell, pick a value from the options panel; changing it after counts as an overwrite
-- **Eliminate** — cross out values you've ruled out; shown in the options panel with a strikethrough
-- **Note** — pin candidate values as small annotations in the corner of the cell
-- **Check (1×)** — verify one committed cell against the solution; the result is permanent and highlighted for the rest of the session. The question row is blocked so you can't narrow the answer by elimination.
+- Commit: tap a cell, pick a value from the options panel. Changing it later adds to your score.
+- Eliminate: cross out values you've ruled out. They stay crossed in the picker when you reopen the cell.
+- Note: pin candidate values as small annotations in the cell corner.
+- Check (one use): verify one committed cell against the answer. The result is permanent and highlighted for the rest of the session. The row containing the puzzle's question is blocked, so you can't check adjacent cells to narrow down the answer by elimination.
 
-After the puzzle resolves (win or DNF) a result card shows your time, overwrite
-count, and a countdown to the next puzzle. One tap copies a shareable stat line
-to the clipboard.
+When you finish (or the clock hits zero), a result card shows your time,
+overwrite count, and a countdown to the next puzzle. One tap copies a shareable
+stat line.
 
 ---
 
 ## Tech stack
 
-- **Next.js 16** (App Router) + **React 19**, TypeScript strict
-- **Tailwind CSS v4**, dark engineer-noir theme (CSS variable palette)
-- **Vitest** for data-layer tests
-- **ESLint** + **Prettier**
-- Deploy target: **Vercel**; no accounts in v1 (localStorage only)
+- Next.js 16 (App Router) + React 19, TypeScript strict
+- Tailwind CSS v4, dark theme backed by a CSS variable palette
+- Vitest for data-layer tests
+- ESLint + Prettier
+- Deployed on Vercel; no accounts in v1 (localStorage only)
 
 ---
 
 ## Getting started
 
-Requires the Node version in [`.nvmrc`](./.nvmrc).
+You'll need the Node version in [`.nvmrc`](./.nvmrc).
 
 ```bash
 nvm use
 npm install
 ```
 
-**For local development and mobile testing, use the production build.**
-Turbopack dev mode breaks React's synthetic event system on iOS Safari
-(`onClick` handlers go silent).
+For mobile testing, use the production build. Turbopack dev mode breaks React's
+synthetic event system on iOS Safari and `onClick` handlers stop firing.
 
 ```bash
 npm run build && npm run start -- --hostname 0.0.0.0
@@ -100,7 +96,7 @@ npm run build && npm run start -- --hostname 0.0.0.0
 |---|---|
 | `npm run build` | Production build |
 | `npm run start` | Serve the production build |
-| `npm run dev` | Dev server (desktop only — see above) |
+| `npm run dev` | Dev server (desktop only, see above) |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run format` | Prettier write |
@@ -117,13 +113,13 @@ app/
   page.tsx                 Landing page (track selector + how-to-play)
   play/page.tsx            Daily puzzle session
   about/page.tsx           About
-  api/share/[id]/route.ts  Share-card endpoint (PNG via satori — upcoming)
+  api/share/[id]/route.ts  Share-card endpoint (PNG via satori, upcoming)
 components/
   PlaySession.tsx          Session state: timer, commits, scoring, modes
-  PuzzleGrid.tsx           4×4 / 5×5 solving grid
+  PuzzleGrid.tsx           4x4 / 5x5 solving grid
   CellPicker.tsx           Value options panel (commit, eliminate, note, check)
-  CluePanel.tsx            Clue list — desktop sidebar
-  ClueDrawer.tsx           Clue list — mobile bottom drawer
+  CluePanel.tsx            Clue list, desktop sidebar
+  ClueDrawer.tsx           Clue list, mobile bottom drawer
   ResultScreen.tsx         Win / DNF overlay with countdown and share
   Hud.tsx                  Timer, overwrite count, track badge
   ModeSelector.tsx         Commit / Eliminate / Note mode tabs
@@ -140,21 +136,21 @@ tests/                     Vitest data-layer tests
 
 ## Daily selection
 
-Wordle-style and deterministic: the day's puzzle is a function of the date so
-everyone gets the same puzzle at the same time. The reset is midnight
-`America/Toronto`, which keeps the shared `Zebra #N` number identical for all
-players. The pool is consumed sequentially — no repeats as long as the bank
-stays ahead of the cursor. See `lib/data/selection.ts`.
+The day's puzzle is determined by the date, not the client. Everyone gets the
+same puzzle at the same time, identified by the same `Zebra #N` number. The
+reset is midnight `America/Toronto`. The pool is consumed sequentially, so
+puzzles don't repeat as long as the bank stays ahead of the cursor. See
+`lib/data/selection.ts`.
 
 ---
 
 ## Puzzle data contract
 
-Puzzles are produced by a separate Python CSP generator and dropped in as
+Puzzles come from a separate Python CSP generator, dropped in as
 `data/puzzles/v1.json`. The generator is the source of truth for rendering and
-grading — never hand-edit exported puzzles. `types/puzzle.ts` mirrors the
-export schema (version 1.0.1); `lib/data/puzzles.ts` validates `schema_version`
-on load. Schema minor bumps → optional field; major bumps → breaking change.
+grading. Don't hand-edit exported puzzles. `types/puzzle.ts` mirrors the export
+schema (version 1.0.1); `lib/data/puzzles.ts` validates `schema_version` on
+load. Minor schema bumps add optional fields; major bumps are breaking changes.
 
 ---
 
