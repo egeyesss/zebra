@@ -249,6 +249,10 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const pickerEliminatedValues = selected
     ? notes[`${selected.category}:${selected.position}`]
     : undefined;
+  const pickerCheckedValue =
+    selected && checkedCell && `${selected.category}:${selected.position}` === checkedCell.key
+      ? { value: committed[checkedCell.key], correct: checkedCell.correct }
+      : undefined;
 
   return (
     <div className="flex flex-1 flex-col lg:h-dvh">
@@ -478,6 +482,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
                     noteMode={noteMode}
                     eliminatedValues={pickerEliminatedValues}
                     onToggleNote={handleToggleNote}
+                    checkedValue={pickerCheckedValue}
                   />
                 </div>
               )}
