@@ -68,18 +68,33 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const [showResult, setShowResult] = useState(false);
   const [noteMode, setNoteMode] = useState(false);
   const [notes, setNotes] = useState<Record<string, Set<string>>>({});
+  const [checkMode, setCheckMode] = useState(false);
+  const [checkUsed, setCheckUsed] = useState(false);
+  const [checkedCell, setCheckedCell] = useState<{ key: string; correct: boolean } | null>(null);
+
+  // Category of the puzzle's hidden answer — checking any cell in this row
+  // would let the player eliminate options to find the answer, so it's blocked.
+  const questionCategory = puzzle.question?.[0] ?? null;
 
   const { hardCapSeconds } = TRACKS[track];
 
   function handleDnf() {
     setDnf(true);
     setSelected(null);
+    setCheckMode(false);
   }
 
   function handleFinish(elapsedSeconds: number) {
     setFinalTime(elapsedSeconds);
+    setCheckMode(false);
     // Small delay so the player sees their last commit flash before the overlay appears.
     setTimeout(() => setShowResult(true), 600);
+  }
+
+  function handleCheckClick() {
+    if (checkUsed || !started || solved || dnf) return;
+    setCheckMode((prev) => !prev);
+    setSelected(null); // close any open picker when entering/exiting check mode
   }
 
   function handleViewSolution() {
@@ -141,6 +156,17 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   }, []);
 
   function handleCellSelect(category: string, position: number) {
+    if (checkMode) {
+      if (category === questionCategory) return; // blocked row
+      const key = `${category}:${position}`;
+      if (!committed[key]) return; // must tap a committed cell
+      const correct =
+        committed[key] === puzzle.solution.assignments[category]?.[position - 1];
+      setCheckedCell({ key, correct });
+      setCheckUsed(true);
+      setCheckMode(false);
+      return;
+    }
     if (!started || solved || dnf) return;
     setSelected((prev) =>
       prev?.category === category && prev?.position === position
@@ -345,21 +371,25 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
             <TrackBadge track={track} />
           </div>
 
-          {/* Right: check button — mobile only. TODO: wire up check-my-work feature */}
+          {/* Right: check button — mobile only */}
           <div className="lg:hidden">
             {started ? (
               <button
-                className="px-2 py-1 text-[10px] rounded-full"
+                onClick={handleCheckClick}
+                disabled={checkUsed}
+                className="px-2 py-1 text-[10px] rounded-full transition-colors"
                 style={{
-                  background: "transparent",
-                  border: "1px solid var(--accent-green)",
-                  color: "var(--accent-green)",
-                  cursor: "pointer",
+                  background: checkMode ? "rgba(212,160,64,0.12)" : "transparent",
+                  border: `1px solid ${checkUsed ? "var(--border)" : checkMode ? "var(--accent-amber)" : "var(--accent-green)"}`,
+                  color: checkUsed ? "var(--fg-muted)" : checkMode ? "var(--accent-amber)" : "var(--accent-green)",
+                  cursor: checkUsed ? "not-allowed" : "pointer",
+                  opacity: checkUsed ? 0.45 : 1,
                   fontFamily: "inherit",
                   letterSpacing: "0.06em",
                 }}
+                aria-pressed={checkMode}
               >
-                check (1)
+                {checkUsed ? "check used" : checkMode ? "cancel" : "check (1)"}
               </button>
             ) : (
               <div className="px-2 py-1 text-[10px] invisible" aria-hidden="true">check (1)</div>
@@ -384,6 +414,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
           elapsedSeconds={finalTime}
           overwrites={overwrites}
           cellsFilled={Object.keys(committed).length}
+          checkUsed={checkUsed}
           onViewSolution={handleViewSolution}
         />
       )}
@@ -429,6 +460,9 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
                 justCommitted={justCommitted}
                 onCellSelect={handleCellSelect}
                 notes={notes}
+                checkMode={checkMode}
+                questionCategory={questionCategory ?? undefined}
+                checkedCell={checkedCell ?? undefined}
               />
 
               {pickerValues && (
@@ -495,19 +529,22 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
           >
             ✎ eliminate
           </button>
-          {/* TODO: wire up check-my-work feature */}
           <button
-            className="px-5 py-2.5 text-[19px] rounded-full"
+            onClick={handleCheckClick}
+            disabled={checkUsed}
+            className="px-5 py-2.5 text-[19px] rounded-full transition-colors"
             style={{
-              background: "transparent",
-              border: "1.5px solid var(--accent-green)",
-              color: "var(--accent-green)",
-              cursor: "pointer",
+              background: checkMode ? "rgba(212,160,64,0.12)" : "transparent",
+              border: `1.5px solid ${checkUsed ? "var(--border)" : checkMode ? "var(--accent-amber)" : "var(--accent-green)"}`,
+              color: checkUsed ? "var(--fg-muted)" : checkMode ? "var(--accent-amber)" : "var(--accent-green)",
+              cursor: checkUsed ? "not-allowed" : "pointer",
+              opacity: checkUsed ? 0.45 : 1,
               fontFamily: "inherit",
               letterSpacing: "0.06em",
             }}
+            aria-pressed={checkMode}
           >
-            check (1)
+            {checkUsed ? "check used" : checkMode ? "cancel" : "check (1)"}
           </button>
         </div>
       )}
