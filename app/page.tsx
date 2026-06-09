@@ -167,15 +167,13 @@ export default async function LandingPage({
         }}
       >
         {/* On desktop, hero grid and streak counter sit side-by-side.
-            On mobile, a compact horizontal streak row sits below the grid. */}
+            On mobile the streak lives at the bottom of the page (below the
+            countdown) so it doesn't crowd the hero grid. */}
         <div className="flex items-center gap-8 xl:gap-14">
           <HeroGrid />
           <div className="hidden lg:block">
             <StreakBlock />
           </div>
-        </div>
-        <div className="lg:hidden">
-          <StreakBlock compact />
         </div>
 
         <h1 className="lp-wordmark">z e b r a</h1>
@@ -202,6 +200,12 @@ export default async function LandingPage({
         <Suspense fallback={<div className="mt-14" style={{ height: "112px" }} />}>
           <CountdownSection initialMode={mode} isFriday={isFriday} />
         </Suspense>
+
+        {/* Mobile streak — sits between the countdown and the footer links.
+            Desktop already has the full StreakBlock beside the hero grid. */}
+        <div className="lg:hidden">
+          <StreakBlock compact />
+        </div>
 
         <div
           className="flex flex-col items-center gap-2"

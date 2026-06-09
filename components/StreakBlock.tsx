@@ -83,9 +83,6 @@ export function StreakBlock({ compact = false }: { compact?: boolean }) {
   // Compact horizontal variant — used on mobile where there isn't room for the
   // full vertical column beside the hero grid.
   if (compact) {
-    // Already synced with no streak: nothing useful to show on mobile.
-    if (!hasStreak && isSignedIn && synced) return null;
-
     return (
       <div
         className="flex items-center justify-center"
