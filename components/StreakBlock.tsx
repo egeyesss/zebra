@@ -9,17 +9,21 @@ import { resetZoneDate } from "@/lib/data/selection";
 import type { StreakState } from "@/types/streak";
 
 export function StreakBlock() {
-  const streak = useStreak();
+  const localStreak = useStreak();
   const { status } = useSession();
   const [synced, setSynced] = useState(false);
   const [syncDate, setSyncDate] = useState<string | null>(null);
+  // After a successful server sync, override the localStorage snapshot so the
+  // correct count shows immediately without depending on the storage event →
+  // useSyncExternalStore notification chain (which can race setState batches).
+  const [serverStreak, setServerStreak] = useState<StreakState | null>(null);
 
   // Stable ref so the sync effect always reads the latest local streak without
   // re-running every time the streak count changes.
-  const localRef = useRef<StreakState>(streak);
+  const localRef = useRef<StreakState>(localStreak);
   useEffect(() => {
-    localRef.current = streak;
-  }, [streak]);
+    localRef.current = localStreak;
+  }, [localStreak]);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -27,8 +31,13 @@ export function StreakBlock() {
     const local = localRef.current;
 
     fetch("/api/streak")
-      .then((r) => r.json())
-      .then(async (server: StreakState) => {
+      .then(async (r) => {
+        // Don't process error responses — 401 body isn't a StreakState.
+        if (!r.ok) return;
+        const server: StreakState = await r.json();
+        // Sanity-check the shape before trusting it.
+        if (typeof server.current !== "number") return;
+
         if (server.current === 0 && local.current > 0) {
           // New account — promote local streak to server once.
           await fetch("/api/streak", {
@@ -43,7 +52,8 @@ export function StreakBlock() {
           });
           // Local state is already correct, nothing to overwrite.
         } else if (server.current > 0 || server.lastPlayedDate !== null) {
-          // Server has data — it wins. Update localStorage to match.
+          // Server has data — it wins. Update both the display and localStorage.
+          setServerStreak(server);
           const serialized = JSON.stringify(server);
           localStorage.setItem(STREAK_STORAGE_KEY, serialized);
           window.dispatchEvent(
@@ -58,6 +68,7 @@ export function StreakBlock() {
       });
   }, [status]);
 
+  const streak = serverStreak ?? localStreak;
   const { current } = streak;
   const hasStreak = current > 0;
   const isSignedIn = status === "authenticated";
