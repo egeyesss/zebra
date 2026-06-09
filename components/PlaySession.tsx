@@ -350,14 +350,12 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
             <Wordmark />
           </Link>
           <div className="flex items-center gap-4">
-            {streak.current > 0 && (
-              <span
-                className="text-fg-muted tabular-nums"
-                style={{ fontSize: "11px", letterSpacing: "0.04em" }}
-              >
-                🔥 {streak.current} day streak
-              </span>
-            )}
+            <span
+              className="text-fg-muted tabular-nums"
+              style={{ fontSize: "11px", letterSpacing: "0.04em" }}
+            >
+              🔥 {streak.current} day streak
+            </span>
             <a
               href="#zebra-about"
               className="text-fg-muted hover:text-fg"
