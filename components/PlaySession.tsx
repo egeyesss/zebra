@@ -14,7 +14,8 @@ import { PuzzleGrid } from "./PuzzleGrid";
 import { ResultScreen } from "./ResultScreen";
 import { TrackBadge } from "./TrackBadge";
 import { Wordmark } from "./Wordmark";
-import { useStreak } from "@/lib/storage/streak";
+import { recordResult, useStreak } from "@/lib/storage/streak";
+import { resetZoneDate } from "@/lib/data/selection";
 
 interface Props {
   puzzle: ExportedPuzzle;
@@ -121,6 +122,14 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const [shuffledAttributes, setShuffledAttributes] = useState<
     Record<string, string[]>
   >(() => ({ ...puzzle.theme.attributes }));
+
+  // Record the streak result exactly once when the result screen first appears.
+  // showResult only transitions false→true once per session; recordResult is
+  // idempotent on the same date so a double-fire (strict mode etc.) is safe.
+  useEffect(() => {
+    if (!showResult || finalTime === null) return;
+    recordResult({ solved, date: resetZoneDate() });
+  }, [showResult, solved, finalTime]);
 
   // Escape key closes the about modal when it's open.
   useEffect(() => {
