@@ -5,7 +5,19 @@
 export function Wordmark({ className = "" }: { className?: string }) {
   return (
     <span className={`tracking-[0.4em] lowercase select-none ${className}`}>
-      zebra
+      z
+      <span
+        style={{
+          display: "inline-block",
+          transform: "scaleX(-1)",
+          fontStyle: "italic",
+          color: "var(--accent-amber)",
+          letterSpacing: 0,
+        }}
+      >
+        9
+      </span>
+      bra
     </span>
   );
 }

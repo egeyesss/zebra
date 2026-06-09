@@ -91,7 +91,7 @@ button, a { touch-action: manipulation; }
 }
 
 .lp-wordmark {
-  /* 68px on desktop, 36px floor — sized so "z e b r a" clears the 24px side
+  /* 68px on desktop, 36px floor — sized so "z 9 b r a" clears the 24px side
      padding at the narrowest iPhone viewport (375px). */
   font-size: clamp(36px, 9.5vw, 68px);
   font-weight: 700;
@@ -102,4 +102,13 @@ button, a { touch-action: manipulation; }
   line-height: 1.1;
   white-space: nowrap;
   color: var(--fg);
+}
+
+/* The reversed-italic amber "9" that stands in for the "e" in the wordmark. */
+.lp-nine {
+  display: inline-block;
+  transform: scaleX(-1);
+  font-style: italic;
+  color: var(--accent-amber);
+  letter-spacing: 0;
 }

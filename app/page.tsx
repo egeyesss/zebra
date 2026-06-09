@@ -177,7 +177,7 @@ export default async function LandingPage({
           </div>
         </div>
 
-        <h1 className="lp-wordmark">z e b r a</h1>
+        <h1 className="lp-wordmark">z <span className="lp-nine">9</span> b r a</h1>
 
         <p
           className="text-center text-fg-muted"
