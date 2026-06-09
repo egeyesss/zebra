@@ -12,7 +12,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Zebra — Daily Logic Puzzle",
+  title: "z9bra — Daily Logic Puzzle",
   description:
     "A daily competitive logic-grid puzzle. Solve against the clock, share the raw numbers.",
 };
