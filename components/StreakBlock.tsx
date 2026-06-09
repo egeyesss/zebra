@@ -104,12 +104,12 @@ export function StreakBlock({ compact = false }: { compact?: boolean }) {
             </div>
           </>
         ) : (
-          <p
-            className="text-center text-fg-muted"
-            style={{ fontSize: "11px", lineHeight: 1.5 }}
-          >
-            Play today to start your streak
-          </p>
+          <div className="flex items-center justify-center" style={{ gap: "7px" }}>
+            <span style={{ fontSize: "22px", lineHeight: 1 }}>🔥</span>
+            <span className="text-fg-muted" style={{ fontSize: "11px" }}>
+              Play today to start your streak
+            </span>
+          </div>
         )}
         <div style={{ marginTop: "4px" }}>
           {isSignedIn && synced ? (
