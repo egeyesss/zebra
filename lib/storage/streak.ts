@@ -2,21 +2,10 @@
 
 import { useSyncExternalStore } from "react";
 
+import type { PuzzleResult, StreakState } from "@/types/streak";
+
+export type { PuzzleResult, StreakState };
 export const STREAK_STORAGE_KEY = "zebra.streak.v1";
-
-export interface StreakState {
-  current: number;
-  longest: number;
-  /** YYYY-MM-DD (reset timezone) of the last counted day, or null if never. */
-  lastPlayedDate: string | null;
-}
-
-export interface PuzzleResult {
-  /** Whether the puzzle was solved (vs. DNF). */
-  solved: boolean;
-  /** Reset-timezone date the result is counted against (YYYY-MM-DD). */
-  date: string;
-}
 
 const ZERO_STATE: StreakState = {
   current: 0,

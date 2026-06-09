@@ -1,10 +1,73 @@
 "use client";
 
-import { useStreak } from "@/lib/storage/streak";
+import { signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useEffect, useRef, useState } from "react";
+
+import { STREAK_STORAGE_KEY, useStreak } from "@/lib/storage/streak";
+import { resetZoneDate } from "@/lib/data/selection";
+import type { StreakState } from "@/types/streak";
 
 export function StreakBlock() {
-  const { current } = useStreak();
+  const streak = useStreak();
+  const { status } = useSession();
+  const [synced, setSynced] = useState(false);
+  const [syncDate, setSyncDate] = useState<string | null>(null);
+
+  // Stable ref so the sync effect always reads the latest local streak without
+  // re-running every time the streak count changes.
+  const localRef = useRef<StreakState>(streak);
+  useEffect(() => {
+    localRef.current = streak;
+  }, [streak]);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+
+    const local = localRef.current;
+
+    fetch("/api/streak")
+      .then((r) => r.json())
+      .then(async (server: StreakState) => {
+        if (server.current === 0 && local.current > 0) {
+          // New account — promote local streak to server once.
+          await fetch("/api/streak", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: "migrate",
+              current: local.current,
+              longest: local.longest,
+              lastPlayedDate: local.lastPlayedDate,
+            }),
+          });
+          // Local state is already correct, nothing to overwrite.
+        } else if (server.current > 0 || server.lastPlayedDate !== null) {
+          // Server has data — it wins. Update localStorage to match.
+          const serialized = JSON.stringify(server);
+          localStorage.setItem(STREAK_STORAGE_KEY, serialized);
+          window.dispatchEvent(
+            new StorageEvent("storage", { key: STREAK_STORAGE_KEY }),
+          );
+        }
+        setSynced(true);
+        setSyncDate(resetZoneDate());
+      })
+      .catch(() => {
+        // Sync failed silently — local streak is the fallback.
+      });
+  }, [status]);
+
+  const { current } = streak;
   const hasStreak = current > 0;
+  const isSignedIn = status === "authenticated";
+
+  // Format "2026-06-09" → "Jun 9"
+  const syncDateFormatted = syncDate
+    ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(
+        new Date(syncDate + "T12:00:00Z"),
+      )
+    : null;
 
   return (
     <div
@@ -39,24 +102,37 @@ export function StreakBlock() {
         </p>
       )}
 
-      <div style={{ width: "100%", height: "1px", background: "var(--border)" }} />
+      <div
+        style={{ width: "100%", height: "1px", background: "var(--border)" }}
+      />
 
-      {/* Phase 3: replace this button with signed-in state ("Synced ✓ Jun 9") */}
-      <button
-        onClick={() => {/* Phase 3: trigger Google OAuth */}}
-        style={{
-          background: "none",
-          border: "none",
-          color: "var(--accent-amber)",
-          fontSize: "13px",
-          cursor: "pointer",
-          fontFamily: "inherit",
-          letterSpacing: "0.04em",
-          padding: 0,
-        }}
-      >
-        Sync your streak ↗
-      </button>
+      {isSignedIn && synced ? (
+        <span
+          style={{
+            fontSize: "12px",
+            color: "var(--accent-green)",
+            letterSpacing: "0.04em",
+          }}
+        >
+          Synced ✓{syncDateFormatted ? ` ${syncDateFormatted}` : ""}
+        </span>
+      ) : (
+        <button
+          onClick={() => signIn("google")}
+          style={{
+            background: "none",
+            border: "none",
+            color: "var(--accent-amber)",
+            fontSize: "13px",
+            cursor: "pointer",
+            fontFamily: "inherit",
+            letterSpacing: "0.04em",
+            padding: 0,
+          }}
+        >
+          Sync your streak ↗
+        </button>
+      )}
     </div>
   );
 }
