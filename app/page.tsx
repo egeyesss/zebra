@@ -166,12 +166,13 @@ export default async function LandingPage({
           gap: "clamp(4px, 1.5dvh, 12px)",
         }}
       >
-        {/* On desktop, hero grid and streak counter sit side-by-side.
-            On mobile the streak lives at the bottom of the page (below the
-            countdown) so it doesn't crowd the hero grid. */}
-        <div className="flex items-center gap-8 xl:gap-14">
+        {/* Hero grid is the centered anchor. StreakBlock is positioned
+            absolutely to its right so the grid itself stays perfectly
+            centered — not offset by the streak block's width.
+            On mobile the streak lives at the bottom of the page instead. */}
+        <div className="relative">
           <HeroGrid />
-          <div className="hidden lg:block">
+          <div className="hidden lg:block absolute top-1/2 left-full -translate-y-1/2 ml-8 xl:ml-14">
             <StreakBlock />
           </div>
         </div>
