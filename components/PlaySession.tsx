@@ -14,6 +14,7 @@ import { PuzzleGrid } from "./PuzzleGrid";
 import { ResultScreen } from "./ResultScreen";
 import { TrackBadge } from "./TrackBadge";
 import { Wordmark } from "./Wordmark";
+import { useSession } from "next-auth/react";
 import { recordResult, useStreak } from "@/lib/storage/streak";
 import { resetZoneDate } from "@/lib/data/selection";
 
@@ -80,6 +81,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
 
   const { hardCapSeconds } = TRACKS[track];
   const streak = useStreak();
+  const { data: session } = useSession();
 
   function handleDnf() {
     setDnf(true);
@@ -128,8 +130,17 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   // idempotent on the same date so a double-fire (strict mode etc.) is safe.
   useEffect(() => {
     if (!showResult || finalTime === null) return;
-    recordResult({ solved, date: resetZoneDate() });
-  }, [showResult, solved, finalTime]);
+    const date = resetZoneDate();
+    recordResult({ solved, date }); // localStorage (instant)
+    // Server sync — fire-and-forget; localStorage is the fallback on failure.
+    if (session) {
+      fetch("/api/streak", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "result", solved, date }),
+      }).catch(() => {});
+    }
+  }, [showResult, solved, finalTime, session]);
 
   // Escape key closes the about modal when it's open.
   useEffect(() => {
