@@ -15,7 +15,7 @@ import { ResultScreen } from "./ResultScreen";
 import { TrackBadge } from "./TrackBadge";
 import { Wordmark } from "./Wordmark";
 import { useSession } from "next-auth/react";
-import { recordResult, useStreak } from "@/lib/storage/streak";
+import { PENDING_RESULT_KEY, recordResult, useStreak } from "@/lib/storage/streak";
 import { resetZoneDate } from "@/lib/data/selection";
 
 interface Props {
@@ -132,13 +132,16 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
     if (!showResult || finalTime === null) return;
     const date = resetZoneDate();
     recordResult({ solved, date }); // localStorage (instant)
-    // Server sync — fire-and-forget; localStorage is the fallback on failure.
     if (session) {
+      // Server sync — fire-and-forget; localStorage is the fallback on failure.
       fetch("/api/streak", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "result", solved, date }),
       }).catch(() => {});
+    } else {
+      // Not signed in — park the result so StreakBlock can flush it on sign-in.
+      localStorage.setItem(PENDING_RESULT_KEY, JSON.stringify({ solved, date }));
     }
   }, [showResult, solved, finalTime, session]);
 

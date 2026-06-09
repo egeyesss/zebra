@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 
-import { STREAK_STORAGE_KEY, useStreak } from "@/lib/storage/streak";
+import { PENDING_RESULT_KEY, STREAK_STORAGE_KEY, useStreak } from "@/lib/storage/streak";
 import { resetZoneDate } from "@/lib/data/selection";
 import type { StreakState } from "@/types/streak";
 
@@ -30,42 +30,60 @@ export function StreakBlock({ compact = false }: { compact?: boolean }) {
 
     const local = localRef.current;
 
-    fetch("/api/streak")
-      .then(async (r) => {
-        // Don't process error responses — 401 body isn't a StreakState.
-        if (!r.ok) return;
-        const server: StreakState = await r.json();
-        // Sanity-check the shape before trusting it.
-        if (typeof server.current !== "number") return;
-
-        if (server.current === 0 && local.current > 0) {
-          // New account — promote local streak to server once.
-          await fetch("/api/streak", {
+    (async () => {
+      // If the user played while signed out, a pending result was stored in
+      // localStorage. Flush it to the server now before reading the streak.
+      const pendingRaw = localStorage.getItem(PENDING_RESULT_KEY);
+      if (pendingRaw) {
+        try {
+          const pr = JSON.parse(pendingRaw) as { solved: boolean; date: string };
+          const r = await fetch("/api/streak", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              type: "migrate",
-              current: local.current,
-              longest: local.longest,
-              lastPlayedDate: local.lastPlayedDate,
-            }),
+            body: JSON.stringify({ type: "result", ...pr }),
           });
-          // Local state is already correct, nothing to overwrite.
-        } else if (server.current > 0 || server.lastPlayedDate !== null) {
-          // Server has data — it wins. Update both the display and localStorage.
-          setServerStreak(server);
-          const serialized = JSON.stringify(server);
-          localStorage.setItem(STREAK_STORAGE_KEY, serialized);
-          window.dispatchEvent(
-            new StorageEvent("storage", { key: STREAK_STORAGE_KEY }),
-          );
+          // Remove on success or definitive failure (wrong date = stale).
+          // Keep only on 503 (DB down) so we retry next sign-in.
+          if (r.status !== 503) {
+            localStorage.removeItem(PENDING_RESULT_KEY);
+          }
+        } catch {
+          // Network error — keep the pending result for next sign-in.
         }
-        setSynced(true);
-        setSyncDate(resetZoneDate());
-      })
-      .catch(() => {
-        // Sync failed silently — local streak is the fallback.
-      });
+      }
+
+      // Fetch and reconcile the server streak.
+      const r = await fetch("/api/streak");
+      if (!r.ok) return;
+      const server: StreakState = await r.json();
+      if (typeof server.current !== "number") return;
+
+      if (server.current === 0 && local.current > 0) {
+        // New account — promote local streak to server once.
+        await fetch("/api/streak", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "migrate",
+            current: local.current,
+            longest: local.longest,
+            lastPlayedDate: local.lastPlayedDate,
+          }),
+        });
+      } else if (server.current > 0 || server.lastPlayedDate !== null) {
+        // Server has data — it wins. Update both the display and localStorage.
+        setServerStreak(server);
+        const serialized = JSON.stringify(server);
+        localStorage.setItem(STREAK_STORAGE_KEY, serialized);
+        window.dispatchEvent(
+          new StorageEvent("storage", { key: STREAK_STORAGE_KEY }),
+        );
+      }
+      setSynced(true);
+      setSyncDate(resetZoneDate());
+    })().catch(() => {
+      // Sync failed silently — local streak is the fallback.
+    });
   }, [status]);
 
   const streak = serverStreak ?? localStreak;

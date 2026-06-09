@@ -6,6 +6,7 @@ import type { PuzzleResult, StreakState } from "@/types/streak";
 
 export type { PuzzleResult, StreakState };
 export const STREAK_STORAGE_KEY = "zebra.streak.v1";
+export const PENDING_RESULT_KEY = "zebra.pending_result.v1";
 
 const ZERO_STATE: StreakState = {
   current: 0,
