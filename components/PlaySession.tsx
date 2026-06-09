@@ -14,6 +14,7 @@ import { PuzzleGrid } from "./PuzzleGrid";
 import { ResultScreen } from "./ResultScreen";
 import { TrackBadge } from "./TrackBadge";
 import { Wordmark } from "./Wordmark";
+import { useStreak } from "@/lib/storage/streak";
 
 interface Props {
   puzzle: ExportedPuzzle;
@@ -77,6 +78,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const questionCategory = puzzle.question?.[0] ?? null;
 
   const { hardCapSeconds } = TRACKS[track];
+  const streak = useStreak();
 
   function handleDnf() {
     setDnf(true);
@@ -327,13 +329,23 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
           <Link href="/" className="no-underline">
             <Wordmark />
           </Link>
-          <a
-            href="#zebra-about"
-            className="text-fg-muted hover:text-fg"
-            style={{ textDecoration: "none" }}
-          >
-            about
-          </a>
+          <div className="flex items-center gap-4">
+            {streak.current > 0 && (
+              <span
+                className="text-fg-muted tabular-nums"
+                style={{ fontSize: "11px", letterSpacing: "0.04em" }}
+              >
+                🔥 {streak.current} day streak
+              </span>
+            )}
+            <a
+              href="#zebra-about"
+              className="text-fg-muted hover:text-fg"
+              style={{ textDecoration: "none" }}
+            >
+              about
+            </a>
+          </div>
         </div>
         <Hud
           started={started}
