@@ -16,6 +16,7 @@ import { Suspense } from "react";
 import { CountdownSection } from "@/components/CountdownSection";
 import { EscapeClose } from "@/components/EscapeClose";
 import { ModeSelector } from "@/components/ModeSelector";
+import { StreakBlock } from "@/components/StreakBlock";
 import { isFridayInToronto } from "@/lib/data/selection";
 
 // ---------------------------------------------------------------------------
@@ -165,7 +166,15 @@ export default async function LandingPage({
           gap: "clamp(4px, 1.5dvh, 12px)",
         }}
       >
-        <HeroGrid />
+        {/* On desktop, hero grid and streak counter sit side-by-side.
+            On mobile there isn't room, so StreakBlock is hidden — the
+            play page header shows the streak there instead. */}
+        <div className="flex items-center gap-8 xl:gap-14">
+          <HeroGrid />
+          <div className="hidden lg:block">
+            <StreakBlock />
+          </div>
+        </div>
 
         <h1 className="lp-wordmark">z e b r a</h1>
 
