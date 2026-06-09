@@ -1,21 +1,5 @@
 "use client";
 
-/**
- * Streak persistence — STUB.
- *
- * v1 has no accounts; the streak lives in localStorage only. This file pins the
- * shape and the storage key so the rest of the app can import against a stable
- * surface, but the real rules are not implemented yet:
- *
- *   TODO(streak): implement recordResult — a streak increments on a solved day,
- *   breaks on a DNF or a skipped Toronto day (see the brief), and tracks the
- *   longest run. Reset boundary is America/Toronto midnight (lib/config.ts).
- *
- * Reading is done through `useSyncExternalStore` so the value is correct on the
- * server (zero state) and stays in sync across tabs via the `storage` event,
- * without a hydrate-in-effect. Until the rules land, `recordResult` is a no-op.
- */
-
 import { useSyncExternalStore } from "react";
 
 export const STREAK_STORAGE_KEY = "zebra.streak.v1";
@@ -30,7 +14,7 @@ export interface StreakState {
 export interface PuzzleResult {
   /** Whether the puzzle was solved (vs. DNF). */
   solved: boolean;
-  /** Reset-timezone date the result is counted against. */
+  /** Reset-timezone date the result is counted against (YYYY-MM-DD). */
   date: string;
 }
 
@@ -40,24 +24,19 @@ const ZERO_STATE: StreakState = {
   lastPlayedDate: null,
 };
 
-// Cache the parsed snapshot so getSnapshot returns a stable reference while the
-// underlying string is unchanged — useSyncExternalStore requires that.
+// Module-level cache so getSnapshot() returns a stable reference while the
+// underlying localStorage string is unchanged — useSyncExternalStore requires it.
 let cachedRaw: string | null = null;
 let cachedState: StreakState = ZERO_STATE;
 
 function getSnapshot(): StreakState {
-  if (typeof window === "undefined") {
-    return ZERO_STATE;
-  }
+  if (typeof window === "undefined") return ZERO_STATE;
   const raw = window.localStorage.getItem(STREAK_STORAGE_KEY);
-  if (raw === cachedRaw) {
-    return cachedState;
-  }
+  if (raw === cachedRaw) return cachedState;
   cachedRaw = raw;
   try {
     cachedState = raw ? (JSON.parse(raw) as StreakState) : ZERO_STATE;
   } catch {
-    // Corrupt storage — fall back to the zero state.
     cachedState = ZERO_STATE;
   }
   return cachedState;
@@ -68,26 +47,78 @@ function getServerSnapshot(): StreakState {
 }
 
 function subscribe(onChange: () => void): () => void {
-  if (typeof window === "undefined") {
-    return () => {};
-  }
+  if (typeof window === "undefined") return () => {};
   window.addEventListener("storage", onChange);
   return () => window.removeEventListener("storage", onChange);
 }
 
-/**
- * Streak hook. Returns the persisted streak and a `recordResult` callback that
- * is currently a no-op (see file header).
- */
-export function useStreak(): StreakState & {
-  recordResult: (result: PuzzleResult) => void;
-} {
-  const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+/** Returns the YYYY-MM-DD string for the day before dateStr. */
+function dayBefore(dateStr: string): string {
+  // Parse as UTC noon to dodge DST edge cases when subtracting a day.
+  const d = new Date(dateStr + "T12:00:00Z");
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
 
-  function recordResult(_result: PuzzleResult): void {
-    // TODO(streak): apply the brief's streak rules and persist. No-op for now.
-    void _result;
+/**
+ * Records a puzzle result and updates the persisted streak.
+ *
+ * Rules (from the brief):
+ *   - Solve on a consecutive day → streak increments.
+ *   - Solve after a gap → streak resets to 1 (start fresh).
+ *   - DNF → streak resets to 0 regardless.
+ *   - Calling twice for the same date is a no-op (handles page refresh).
+ */
+export function recordResult(result: PuzzleResult): void {
+  if (typeof window === "undefined") return;
+
+  const raw = window.localStorage.getItem(STREAK_STORAGE_KEY);
+  let state: StreakState;
+  try {
+    state = raw ? (JSON.parse(raw) as StreakState) : ZERO_STATE;
+  } catch {
+    state = ZERO_STATE;
   }
 
-  return { ...state, recordResult };
+  const { date, solved } = result;
+
+  // Idempotent — already recorded a result for today.
+  if (state.lastPlayedDate === date) return;
+
+  const isConsecutive = state.lastPlayedDate === dayBefore(date);
+
+  let next: StreakState;
+  if (solved) {
+    const newCurrent = isConsecutive ? state.current + 1 : 1;
+    next = {
+      current: newCurrent,
+      longest: Math.max(state.longest, newCurrent),
+      lastPlayedDate: date,
+    };
+  } else {
+    // DNF breaks the streak but still marks today as played so a second
+    // attempt (page reload) can't reset and try again.
+    next = {
+      current: 0,
+      longest: state.longest,
+      lastPlayedDate: date,
+    };
+  }
+
+  const serialized = JSON.stringify(next);
+  window.localStorage.setItem(STREAK_STORAGE_KEY, serialized);
+
+  // Update the module cache immediately so the next getSnapshot() call
+  // returns the new state before React schedules a re-render.
+  cachedRaw = serialized;
+  cachedState = next;
+
+  // The native 'storage' event only fires in *other* tabs. Dispatch a
+  // synthetic one so useSyncExternalStore subscribers in this tab are notified.
+  window.dispatchEvent(new StorageEvent("storage", { key: STREAK_STORAGE_KEY }));
+}
+
+/** Returns the persisted streak state. Use recordResult() to update it. */
+export function useStreak(): StreakState {
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
