@@ -1,5 +1,7 @@
 # z9bra
 
+![z9bra](app/opengraph-image.png)
+
 The Einstein ("zebra") riddle as a daily puzzle. One per day, one hard timer,
 one score: how many times you changed a committed cell. Zero is Flawless.
 
