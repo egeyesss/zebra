@@ -167,13 +167,15 @@ export default async function LandingPage({
         }}
       >
         {/* On desktop, hero grid and streak counter sit side-by-side.
-            On mobile there isn't room, so StreakBlock is hidden — the
-            play page header shows the streak there instead. */}
+            On mobile, a compact horizontal streak row sits below the grid. */}
         <div className="flex items-center gap-8 xl:gap-14">
           <HeroGrid />
           <div className="hidden lg:block">
             <StreakBlock />
           </div>
+        </div>
+        <div className="lg:hidden">
+          <StreakBlock compact />
         </div>
 
         <h1 className="lp-wordmark">z e b r a</h1>

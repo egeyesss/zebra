@@ -8,7 +8,7 @@ import { STREAK_STORAGE_KEY, useStreak } from "@/lib/storage/streak";
 import { resetZoneDate } from "@/lib/data/selection";
 import type { StreakState } from "@/types/streak";
 
-export function StreakBlock() {
+export function StreakBlock({ compact = false }: { compact?: boolean }) {
   const localStreak = useStreak();
   const { status } = useSession();
   const [synced, setSynced] = useState(false);
@@ -79,6 +79,65 @@ export function StreakBlock() {
         new Date(syncDate + "T12:00:00Z"),
       )
     : null;
+
+  // Compact horizontal variant — used on mobile where there isn't room for the
+  // full vertical column beside the hero grid.
+  if (compact) {
+    // Already synced with no streak: nothing useful to show on mobile.
+    if (!hasStreak && isSignedIn && synced) return null;
+
+    return (
+      <div
+        className="flex items-center justify-center"
+        style={{ gap: "10px", fontSize: "12px" }}
+      >
+        {hasStreak && (
+          <>
+            <span style={{ fontSize: "16px", lineHeight: 1 }}>🔥</span>
+            <span
+              className="tabular-nums font-bold text-fg"
+              style={{ fontSize: "18px", lineHeight: 1 }}
+            >
+              {current}
+            </span>
+            <span
+              className="text-fg-muted"
+              style={{ fontSize: "10px", letterSpacing: "0.22em" }}
+            >
+              DAY STREAK
+            </span>
+            <span style={{ color: "var(--border)" }}>·</span>
+          </>
+        )}
+        {isSignedIn && synced ? (
+          <span
+            style={{
+              color: "var(--accent-green)",
+              letterSpacing: "0.04em",
+            }}
+          >
+            Synced ✓{syncDateFormatted ? ` ${syncDateFormatted}` : ""}
+          </span>
+        ) : (
+          <button
+            onClick={() => signIn("google")}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--accent-amber)",
+              fontSize: "12px",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              letterSpacing: "0.04em",
+              padding: 0,
+            }}
+          >
+            Sync your streak ↗
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div
