@@ -11,6 +11,7 @@ declare module "next-auth" {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [Google],
+  trustHost: true,
   callbacks: {
     session({ session, token }) {
       if (token.sub) session.user.id = token.sub;
