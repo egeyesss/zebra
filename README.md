@@ -13,20 +13,20 @@ Good for waking your brain up in the morning.
 
 <table>
   <tr>
-    <td align="center"><b>Landing</b></td>
+    <td align="center"><b>Landing (desktop)</b></td>
+    <td align="center"><b>Landing (mobile)</b></td>
+  </tr>
+  <tr>
+    <td><img src="public/screenshots/landing-desktop.png" width="480" alt="Landing page desktop" /></td>
+    <td><img src="public/screenshots/landing-mobile.png" width="240" alt="Landing page mobile" /></td>
+  </tr>
+  <tr>
     <td align="center"><b>Puzzle (desktop)</b></td>
-  </tr>
-  <tr>
-    <td><img src="public/screenshots/landing-desktop.png" width="480" alt="Landing page" /></td>
-    <td><img src="public/screenshots/puzzle-inplay-desktop.png" width="480" alt="Puzzle in play on desktop" /></td>
-  </tr>
-  <tr>
     <td align="center"><b>Puzzle (mobile)</b></td>
-    <td align="center"></td>
   </tr>
   <tr>
+    <td><img src="public/screenshots/puzzle-inplay-desktop.png" width="480" alt="Puzzle in play on desktop" /></td>
     <td><img src="public/screenshots/puzzle-inplay-mobile.png" width="240" alt="Puzzle in play on mobile" /></td>
-    <td></td>
   </tr>
 </table>
 
