@@ -80,58 +80,66 @@ export function StreakBlock({ compact = false }: { compact?: boolean }) {
       )
     : null;
 
-  // Compact horizontal variant — used on mobile where there isn't room for the
-  // full vertical column beside the hero grid.
+  // Compact vertical variant for mobile — mini version of the desktop block.
+  // Streak number sits above the sync status, everything centered.
   if (compact) {
     return (
-      <div
-        className="flex items-center justify-center"
-        style={{ gap: "10px", fontSize: "12px" }}
-      >
-        {hasStreak && (
+      <div className="flex flex-col items-center" style={{ gap: "4px" }}>
+        {hasStreak ? (
           <>
-            <span style={{ fontSize: "16px", lineHeight: 1 }}>🔥</span>
-            <span
-              className="tabular-nums font-bold text-fg"
-              style={{ fontSize: "18px", lineHeight: 1 }}
-            >
-              {current}
-            </span>
-            <span
+            <div className="flex items-center" style={{ gap: "7px" }}>
+              <span style={{ fontSize: "22px", lineHeight: 1 }}>🔥</span>
+              <span
+                className="tabular-nums font-bold text-fg"
+                style={{ fontSize: "40px", lineHeight: 1 }}
+              >
+                {current}
+              </span>
+            </div>
+            <div
               className="text-fg-muted"
-              style={{ fontSize: "10px", letterSpacing: "0.22em" }}
+              style={{ fontSize: "9px", letterSpacing: "0.25em" }}
             >
               DAY STREAK
-            </span>
-            <span style={{ color: "var(--border)" }}>·</span>
+            </div>
           </>
-        )}
-        {isSignedIn && synced ? (
-          <span
-            style={{
-              color: "var(--accent-green)",
-              letterSpacing: "0.04em",
-            }}
-          >
-            Synced ✓{syncDateFormatted ? ` ${syncDateFormatted}` : ""}
-          </span>
         ) : (
-          <button
-            onClick={() => signIn("google")}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--accent-amber)",
-              fontSize: "12px",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              letterSpacing: "0.04em",
-              padding: 0,
-            }}
+          <p
+            className="text-center text-fg-muted"
+            style={{ fontSize: "11px", lineHeight: 1.5 }}
           >
-            Sync your streak ↗
-          </button>
+            Play today to start your streak
+          </p>
         )}
+        <div style={{ marginTop: "4px" }}>
+          {isSignedIn && synced ? (
+            <span
+              style={{
+                color: "var(--accent-green)",
+                fontSize: "11px",
+                letterSpacing: "0.04em",
+              }}
+            >
+              Synced ✓{syncDateFormatted ? ` ${syncDateFormatted}` : ""}
+            </span>
+          ) : (
+            <button
+              onClick={() => signIn("google")}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--accent-amber)",
+                fontSize: "12px",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                letterSpacing: "0.04em",
+                padding: 0,
+              }}
+            >
+              Sync your streak ↗
+            </button>
+          )}
+        </div>
       </div>
     );
   }
