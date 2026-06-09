@@ -420,6 +420,10 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
           cellsFilled={Object.keys(committed).length}
           checkUsed={checkUsed}
           onViewSolution={handleViewSolution}
+          puzzleSize={puzzle.size}
+          puzzleCategories={Object.keys(puzzle.theme.attributes)}
+          overwrittenCells={overwrittenCells}
+          checkedCellKey={checkedCell?.key ?? null}
         />
       )}
 

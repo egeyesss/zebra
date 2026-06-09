@@ -30,22 +30,48 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
+function buildShareGrid(
+  size: number,
+  categories: string[],
+  overwrittenCells: Set<string>,
+  checkedCellKey: string | null,
+): string {
+  return categories
+    .map((cat) =>
+      Array.from({ length: size }, (_, i) => {
+        const key = `${cat}:${i + 1}`;
+        if (key === checkedCellKey) return "🟦";
+        if (overwrittenCells.has(key)) return "🟧";
+        return "🟩";
+      }).join(" "),
+    )
+    .join("\n");
+}
+
 function buildShareText(
   mode: "win" | "dnf",
   track: Track,
   number: number | null,
   timeStr: string,
   overwrites: number,
-  cellsFilled: number,
+  checkUsed: boolean,
+  puzzleSize: number,
+  puzzleCategories: string[],
+  overwrittenCells: Set<string>,
+  checkedCellKey: string | null,
 ): string {
   const { emoji, label } = TRACKS[track];
   const header = `Zebra${number !== null ? ` #${number}` : ""} ${emoji} ${label}`;
+  const overwriteStr = `${overwrites} overwrite${overwrites !== 1 ? "s" : ""}`;
+  const checkSuffix = checkUsed ? " - 1 check used" : "";
+
   if (mode === "dnf") {
-    return `${header}\nDNF at ${timeStr} · ${cellsFilled} commit${cellsFilled !== 1 ? "s" : ""}\nzebra.xyz`;
+    return `${header}\nDNF · ${overwriteStr}${checkSuffix}\nzebra.xyz`;
   }
-  const scoreStr =
-    overwrites === 0 ? "Flawless" : `${overwrites} overwrite${overwrites !== 1 ? "s" : ""}`;
-  return `${header}\n${timeStr} · ${scoreStr}\nzebra.xyz`;
+
+  const scoreStr = overwrites === 0 ? "Flawless" : overwriteStr;
+  const grid = buildShareGrid(puzzleSize, puzzleCategories, overwrittenCells, checkedCellKey);
+  return `${header}\n${timeStr} · ${scoreStr}${checkSuffix}\n${grid}\nzebra.xyz`;
 }
 
 interface Props {
@@ -55,9 +81,12 @@ interface Props {
   elapsedSeconds: number;
   overwrites: number;
   cellsFilled: number;
-  /** Whether the player used their one-time cell check. Stored here for future result screen display. */
   checkUsed: boolean;
   onViewSolution: () => void;
+  puzzleSize: number;
+  puzzleCategories: string[];
+  overwrittenCells: Set<string>;
+  checkedCellKey: string | null;
 }
 
 export function ResultScreen({
@@ -67,7 +96,12 @@ export function ResultScreen({
   elapsedSeconds,
   overwrites,
   cellsFilled,
+  checkUsed,
   onViewSolution,
+  puzzleSize,
+  puzzleCategories,
+  overwrittenCells,
+  checkedCellKey,
 }: Props) {
   const [countdownParts, setCountdownParts] = useState<[string, string]>(["", ""]);
   const [dateStr, setDateStr] = useState("");
@@ -95,7 +129,18 @@ export function ResultScreen({
 
   const isWin = mode === "win";
   const timeStr = formatTime(elapsedSeconds);
-  const shareText = buildShareText(mode, track, number, timeStr, overwrites, cellsFilled);
+  const shareText = buildShareText(
+    mode,
+    track,
+    number,
+    timeStr,
+    overwrites,
+    checkUsed,
+    puzzleSize,
+    puzzleCategories,
+    overwrittenCells,
+    checkedCellKey,
+  );
   const { emoji, label } = TRACKS[track];
 
   const stateColor = isWin ? "var(--accent-green)" : "var(--accent-red)";
