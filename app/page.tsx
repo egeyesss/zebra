@@ -227,7 +227,7 @@ export default async function LandingPage({
             className="text-center text-fg-muted"
             style={{ letterSpacing: "0.2em", opacity: 0.45 }}
           >
-            zebra.xyz
+            zebra9.xyz
           </div>
         </div>
       </main>

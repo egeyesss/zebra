@@ -66,12 +66,12 @@ function buildShareText(
   const checkSuffix = checkUsed ? " - 1 check used" : "";
 
   if (mode === "dnf") {
-    return `${header}\nDNF · ${overwriteStr}${checkSuffix}\nzebra.xyz`;
+    return `${header}\nDNF · ${overwriteStr}${checkSuffix}\nzebra9.xyz`;
   }
 
   const scoreStr = overwrites === 0 ? "Flawless" : overwriteStr;
   const grid = buildShareGrid(puzzleSize, puzzleCategories, overwrittenCells, checkedCellKey);
-  return `${header}\n${timeStr} · ${scoreStr}${checkSuffix}\n${grid}\nzebra.xyz`;
+  return `${header}\n${timeStr} · ${scoreStr}${checkSuffix}\n${grid}\nzebra9.xyz`;
 }
 
 interface Props {

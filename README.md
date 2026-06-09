@@ -1,11 +1,11 @@
-# Zebra
+# z9bra
 
 The Einstein ("zebra") riddle as a daily puzzle. One per day, one hard timer,
 one score: how many times you changed a committed cell. Zero is Flawless.
 
 Good for waking your brain up in the morning.
 
-**website coming soon**
+**[zebra9.xyz](https://zebra9.xyz)**
 
 ---
 
@@ -137,7 +137,7 @@ tests/                     Vitest data-layer tests
 ## Daily selection
 
 The day's puzzle is determined by the date, not the client. Everyone gets the
-same puzzle at the same time, identified by the same `Zebra #N` number. The
+same puzzle at the same time, identified by the same `z9bra #N` number. The
 reset is midnight `America/Toronto`. The pool is consumed sequentially, so
 puzzles don't repeat as long as the bank stays ahead of the cursor. See
 `lib/data/selection.ts`.
