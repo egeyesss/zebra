@@ -89,56 +89,31 @@ function HeroGrid() {
 const RULES: { marker: string; color?: string; body: React.ReactNode }[] = [
   {
     marker: "▸",
-    body: "Read the clues and deduce the value of every cell in the grid.",
+    body: "Read the clues and deduce the value of every cell in the grid to win the game.",
   },
   {
     marker: "▸",
-    body: (
-      <>
-        Tap a cell, tap a value — it <b>commits instantly</b>. No &ldquo;are
-        you sure&rdquo;.
-      </>
-    ),
+    body: "Tap a cell, tap a value. It commits instantly. No make sures.",
   },
   {
     marker: "●",
     color: "var(--accent-red)",
-    body: (
-      <>
-        Change a committed cell and it&apos;s logged as an <b>overwrite</b>.
-        They all count.
-      </>
-    ),
+    body: "Change a cell and it will count as an overwrite. That's your score. High = Bad.",
   },
   {
     marker: "✓",
     color: "var(--accent-green)",
-    body: (
-      <>
-        You get <b>one check</b>, on one cell. That&apos;s your only signal —
-        use it well.
-      </>
-    ),
+    body: "You get one check, on a single cell. No other help.",
   },
   {
     marker: "◷",
     color: "var(--accent-amber)",
-    body: (
-      <>
-        Beat the clock.{" "}
-        <span className="text-fg-muted">10:00 Coffee · 25:00 Deep.</span>{" "}
-        Hit the cap and it&apos;s a <b>DNF</b>.
-      </>
-    ),
+    body: "Beat the clock. 10:00 Coffee · 25:00 Deep. Don't be a DNF.",
   },
   {
     marker: "✨",
     color: "var(--accent-green)",
-    body: (
-      <>
-        Zero overwrites is <b>Flawless</b>. That&apos;s the whole game.
-      </>
-    ),
+    body: "Zero overwrites is Flawless. That's what to aim for.",
   },
 ];
 
