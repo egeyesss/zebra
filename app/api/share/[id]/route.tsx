@@ -29,8 +29,16 @@ function formatTime(s: number): string {
 const BG = "#1a1612";
 const FG = "#e8e2d6";
 const FG_MUTED = "#968d7e";
-const ACCENT_RED = "#cf5454";
+const ACCENT_AMBER = "#d4a040";
 const ACCENT_GREEN = "#6dbf6d";
+
+function formatOvertime(secs: number): string {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  if (m === 0) return `${s}s`;
+  if (s === 0) return `${m}m`;
+  return `${m}m ${s}s`;
+}
 
 export async function GET(
   request: Request,
@@ -46,8 +54,7 @@ export async function GET(
   const track = (url.searchParams.get("track") ?? "coffee") as Track;
   const elapsed = parseInt(url.searchParams.get("t") ?? "0", 10);
   const overwrites = parseInt(url.searchParams.get("ow") ?? "0", 10);
-  const dnf = url.searchParams.get("dnf") === "1";
-  const cells = parseInt(url.searchParams.get("cells") ?? "0", 10);
+  const overtime = url.searchParams.get("ot") === "1";
   const numParam = url.searchParams.get("num");
 
   const trackConfig = TRACKS[track] ?? TRACKS.coffee;
@@ -60,16 +67,18 @@ export async function GET(
     day: "2-digit",
   }).format(new Date());
 
-  const heroText = dnf ? "DNF" : timeStr;
-  const heroColor = dnf ? ACCENT_RED : FG;
+  const overtimeSeconds = overtime ? Math.max(0, elapsed - trackConfig.hardCapSeconds) : 0;
+  const heroText = overtime ? `+${formatOvertime(overtimeSeconds)}` : timeStr;
+  const heroColor = overtime ? ACCENT_AMBER : FG;
 
-  const subtitleText = dnf
-    ? `at ${timeStr}  ·  ${cells} commit${cells !== 1 ? "s" : ""}`
+  const subtitleText = overwrites === 0
+    ? "flawless"
+    : `${overwrites} overwrite${overwrites !== 1 ? "s" : ""}`;
+  const subtitleColor = overtime
+    ? ACCENT_AMBER
     : overwrites === 0
-      ? "flawless"
-      : `${overwrites} overwrite${overwrites !== 1 ? "s" : ""}`;
-  const subtitleColor =
-    dnf ? ACCENT_RED : overwrites === 0 ? ACCENT_GREEN : FG_MUTED;
+      ? ACCENT_GREEN
+      : FG_MUTED;
 
   const headerLine = [
     "z e b r a",

@@ -108,7 +108,7 @@ const RULES: { marker: string; color?: string; body: React.ReactNode }[] = [
   {
     marker: "◷",
     color: "var(--accent-amber)",
-    body: "Beat the clock. 10:00 Coffee · 25:00 Deep. Don't be a DNF.",
+    body: "Beat the clock. 10:00 Coffee · 25:00 Deep. Go over and it's Overtime.",
   },
   {
     marker: "✨",

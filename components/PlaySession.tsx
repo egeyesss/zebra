@@ -56,7 +56,6 @@ function checkSolved(
 
 export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const [started, setStarted] = useState(false);
-  const [dnf, setDnf] = useState(false);
   const [committed, setCommitted] = useState<Record<string, string>>({});
   const [selected, setSelected] = useState<{
     category: string;
@@ -84,13 +83,6 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const streak = useStreak();
   const { data: session } = useSession();
 
-  function handleDnf() {
-    if (!isPreview) trackEvent("puzzle_dnf", { track, number });
-    setDnf(true);
-    setSelected(null);
-    setCheckMode(false);
-  }
-
   function handleFinish(elapsedSeconds: number) {
     setFinalTime(elapsedSeconds);
     setCheckMode(false);
@@ -99,7 +91,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   }
 
   function handleCheckClick() {
-    if (checkUsed || !started || solved || dnf) return;
+    if (checkUsed || !started || solved) return;
     setCheckMode((prev) => !prev);
     setSelected(null); // close any open picker when entering/exiting check mode
   }
@@ -143,6 +135,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
         overwrites,
         check_used: checkUsed,
         flawless: overwrites === 0,
+        overtime: finalTime > hardCapSeconds,
       });
     }
     if (session) {
@@ -156,7 +149,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
       // Not signed in — park the result so StreakBlock can flush it on sign-in.
       localStorage.setItem(PENDING_RESULT_KEY, JSON.stringify({ solved, date }));
     }
-  }, [showResult, solved, finalTime, session, isPreview, track, number, overwrites, checkUsed]);
+  }, [showResult, solved, finalTime, session, isPreview, track, number, overwrites, checkUsed, hardCapSeconds]);
 
   // Escape key closes the about modal when it's open.
   useEffect(() => {
@@ -205,7 +198,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
       setCheckMode(false);
       return;
     }
-    if (!started || solved || dnf) return;
+    if (!started || solved) return;
     setSelected((prev) =>
       prev?.category === category && prev?.position === position
         ? null
@@ -214,7 +207,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   }
 
   function handleCommit(value: string) {
-    if (!selected || !started || dnf || solved) return;
+    if (!selected || !started || solved) return;
     const key = `${selected.category}:${selected.position}`;
     const existing = committed[key];
 
@@ -255,7 +248,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   }
 
   function handleToggleNote(value: string) {
-    if (!selected || !started || dnf || solved) return;
+    if (!selected || !started || solved) return;
     const key = `${selected.category}:${selected.position}`;
     setNotes((prev) => {
       const next = new Set(prev[key] ?? []);
@@ -387,10 +380,8 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
         <Hud
           started={started}
           solved={solved}
-          dnf={dnf}
           hardCapSeconds={hardCapSeconds}
           overwrites={overwrites}
-          onDnf={handleDnf}
           onFinish={handleFinish}
         />
         <div className="flex w-full items-center justify-between text-sm lg:w-auto lg:justify-center lg:gap-3">
@@ -461,11 +452,12 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
 
       {showResult && finalTime !== null && (
         <ResultScreen
-          mode={solved ? "win" : "dnf"}
+          mode={finalTime > hardCapSeconds ? "overtime" : "win"}
           track={track}
           number={number}
           puzzleId={puzzle.id}
           elapsedSeconds={finalTime}
+          hardCapSeconds={hardCapSeconds}
           overwrites={overwrites}
           cellsFilled={Object.keys(committed).length}
           checkUsed={checkUsed}
@@ -557,7 +549,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
         )}
       </main>
 
-      {started && !dnf && pickerValues && (
+      {started && pickerValues && (
         <div
           className="fixed inset-x-0 z-50 px-3 py-2 lg:hidden"
           style={{ bottom: "3.5rem" }}

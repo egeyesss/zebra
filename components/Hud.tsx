@@ -5,11 +5,9 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 interface Props {
   started: boolean;
   solved: boolean;
-  dnf: boolean;
   hardCapSeconds: number;
   overwrites: number;
-  onDnf: () => void;
-  /** Called once when the timer freezes (win or DNF), with the final elapsed seconds. */
+  /** Called once when the timer freezes (solve), with the final elapsed seconds. */
   onFinish?: (elapsedSeconds: number) => void;
 }
 
@@ -21,58 +19,38 @@ function formatTime(s: number): string {
 export function Hud({
   started,
   solved,
-  dnf,
   hardCapSeconds,
   overwrites,
-  onDnf,
   onFinish,
 }: Props) {
   const [elapsed, setElapsed] = useState(0);
-  const dnfFiredRef = useRef(false);
   const finishFiredRef = useRef(false);
-  // Always hold latest callbacks without re-registering the interval.
-  const onDnfRef = useRef(onDnf);
-  useEffect(() => {
-    onDnfRef.current = onDnf;
-  });
-  // Live ref so the onFinish effect always reads the current elapsed value.
-  // useLayoutEffect (not render assignment) satisfies react-hooks/refs; layout
-  // effects run before regular effects, so the ref is fresh when stopped fires.
   const elapsedRef = useRef(0);
   useLayoutEffect(() => {
     elapsedRef.current = elapsed;
   }, [elapsed]);
 
-  const stopped = solved || dnf;
-
-  // Tick up while running; clean up when stopped or unmounted.
+  // Tick freely while running — no cap, no forced stop at hardCapSeconds.
   useEffect(() => {
-    if (!started || stopped) return;
+    if (!started || solved) return;
     const id = setInterval(() => {
-      setElapsed((prev) => Math.min(prev + 1, hardCapSeconds));
+      setElapsed((prev) => prev + 1);
     }, 1000);
     return () => clearInterval(id);
-  }, [started, stopped, hardCapSeconds]);
+  }, [started, solved]);
 
-  // Fire onDnf exactly once when the cap is reached.
+  // Fire onFinish exactly once when the puzzle is solved.
   useEffect(() => {
-    if (!started || stopped) return;
-    if (elapsed < hardCapSeconds) return;
-    if (dnfFiredRef.current) return;
-    dnfFiredRef.current = true;
-    onDnfRef.current();
-  }, [elapsed, hardCapSeconds, started, stopped]);
-
-  // Fire onFinish exactly once when the timer freezes (win or DNF).
-  useEffect(() => {
-    if (!stopped || finishFiredRef.current) return;
+    if (!solved || finishFiredRef.current) return;
     finishFiredRef.current = true;
     onFinish?.(elapsedRef.current);
-  }, [stopped, onFinish]);
+  }, [solved, onFinish]);
 
-  const pct = hardCapSeconds > 0 ? elapsed / hardCapSeconds : 0;
+  const overtime = elapsed >= hardCapSeconds;
+  const pct = hardCapSeconds > 0 ? Math.min(elapsed / hardCapSeconds, 1) : 0;
+
   let timerColor: string;
-  if (dnf) {
+  if (overtime) {
     timerColor = "var(--accent-red)";
   } else if (pct >= 0.95) {
     timerColor = "var(--accent-red)";

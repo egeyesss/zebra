@@ -48,11 +48,20 @@ function buildShareGrid(
     .join("\n");
 }
 
+function formatOvertime(secs: number): string {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  if (m === 0) return `${s}s`;
+  if (s === 0) return `${m}m`;
+  return `${m}m ${s}s`;
+}
+
 function buildShareText(
-  mode: "win" | "dnf",
+  mode: "win" | "overtime",
   track: Track,
   number: number | null,
   timeStr: string,
+  overtimeStr: string,
   overwrites: number,
   checkUsed: boolean,
   puzzleSize: number,
@@ -62,24 +71,24 @@ function buildShareText(
 ): string {
   const { emoji, label } = TRACKS[track];
   const header = `Zebra${number !== null ? ` #${number}` : ""} ${emoji} ${label}`;
-  const overwriteStr = `${overwrites} overwrite${overwrites !== 1 ? "s" : ""}`;
-  const checkSuffix = checkUsed ? " - 1 check used" : "";
+  const scoreStr = overwrites === 0 ? "Flawless" : `${overwrites} overwrite${overwrites !== 1 ? "s" : ""}`;
+  const checkSuffix = checkUsed ? " · 1 check used" : "";
+  const grid = buildShareGrid(puzzleSize, puzzleCategories, overwrittenCells, checkedCellKey);
 
-  if (mode === "dnf") {
-    return `${header}\nDNF · ${overwriteStr}${checkSuffix}\nzebra9.xyz`;
+  if (mode === "overtime") {
+    return `${header}\nOvertime +${overtimeStr} · ${scoreStr}${checkSuffix}\n${grid}\nzebra9.xyz`;
   }
 
-  const scoreStr = overwrites === 0 ? "Flawless" : overwriteStr;
-  const grid = buildShareGrid(puzzleSize, puzzleCategories, overwrittenCells, checkedCellKey);
   return `${header}\n${timeStr} · ${scoreStr}${checkSuffix}\n${grid}\nzebra9.xyz`;
 }
 
 interface Props {
-  mode: "win" | "dnf";
+  mode: "win" | "overtime";
   track: Track;
   number: number | null;
   puzzleId: string;
   elapsedSeconds: number;
+  hardCapSeconds: number;
   overwrites: number;
   cellsFilled: number;
   checkUsed: boolean;
@@ -96,6 +105,7 @@ export function ResultScreen({
   number,
   puzzleId,
   elapsedSeconds,
+  hardCapSeconds,
   overwrites,
   cellsFilled,
   checkUsed,
@@ -130,12 +140,15 @@ export function ResultScreen({
   }, []);
 
   const isWin = mode === "win";
+  const overtimeSeconds = Math.max(0, elapsedSeconds - hardCapSeconds);
+  const overtimeStr = formatOvertime(overtimeSeconds);
   const timeStr = formatTime(elapsedSeconds);
   const shareText = buildShareText(
     mode,
     track,
     number,
     timeStr,
+    overtimeStr,
     overwrites,
     checkUsed,
     puzzleSize,
@@ -149,7 +162,7 @@ export function ResultScreen({
       track,
       t: String(elapsedSeconds),
       ow: String(overwrites),
-      dnf: mode === "dnf" ? "1" : "0",
+      ot: mode === "overtime" ? "1" : "0",
       cells: String(cellsFilled),
     });
     if (number !== null) p.set("num", String(number));
@@ -158,15 +171,13 @@ export function ResultScreen({
 
   const { emoji, label } = TRACKS[track];
 
-  const stateColor = isWin ? "var(--accent-green)" : "var(--accent-red)";
-  const stateLabel = isWin ? "SOLVED" : "DID NOT FINISH";
-  const heroText = isWin ? timeStr : "DNF";
-  const heroColor = isWin ? "var(--fg)" : "var(--accent-red)";
-  const subtitle = isWin
-    ? overwrites === 0
-      ? "flawless"
-      : `${overwrites} overwrite${overwrites !== 1 ? "s" : ""}`
-    : `${cellsFilled} commit${cellsFilled !== 1 ? "s" : ""}`;
+  const stateColor = isWin ? "var(--accent-green)" : "var(--accent-amber)";
+  const stateLabel = isWin ? "SOLVED" : "OVERTIME";
+  const heroText = isWin ? timeStr : `+${overtimeStr}`;
+  const heroColor = isWin ? "var(--fg)" : "var(--accent-amber)";
+  const subtitle = overwrites === 0
+    ? "flawless"
+    : `${overwrites} overwrite${overwrites !== 1 ? "s" : ""}`;
 
   const paddedNumber = number !== null ? String(number).padStart(3, "0") : null;
   const trackIdStr = `${emoji} ${label.toUpperCase()}${paddedNumber ? ` · #${paddedNumber}` : ""}`;
@@ -326,13 +337,9 @@ export function ResultScreen({
             onClick={handleCopy}
             style={{
               ...pillBase,
-              background: isWin ? "rgba(109,191,109,0.1)" : "transparent",
-              boxShadow: `inset 0 0 0 1px ${isWin ? "var(--accent-green)" : "var(--border)"}`,
-              color: isWin
-                ? copied
-                  ? "var(--fg)"
-                  : "var(--accent-green)"
-                : "var(--fg)",
+              background: "rgba(109,191,109,0.1)",
+              boxShadow: "inset 0 0 0 1px var(--accent-green)",
+              color: copied ? "var(--fg)" : "var(--accent-green)",
             }}
           >
             {copied ? "[ copied ✓ ]" : "[ copy result ]"}
