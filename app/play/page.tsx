@@ -1,7 +1,9 @@
+import { DeepGate } from "@/components/DeepGate";
 import { PlaySession } from "@/components/PlaySession";
 import { getCoffeePool, getDeepPool } from "@/lib/data/puzzles";
 import {
   deepPuzzleNumber,
+  isFridayInToronto,
   puzzleNumber,
   selectDailyPuzzle,
   selectDeepPuzzle,
@@ -16,6 +18,9 @@ export default async function PlayPage({
   const mode = params.mode === "deep" ? "deep" : "coffee";
 
   if (mode === "deep") {
+    if (!isFridayInToronto()) {
+      return <DeepGate />;
+    }
     const pool = getDeepPool();
     const scheduled = selectDeepPuzzle(pool);
     const puzzle = scheduled ?? pool[0] ?? getCoffeePool()[0]!;
