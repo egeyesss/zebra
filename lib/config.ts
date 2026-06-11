@@ -20,7 +20,7 @@ export const RESET_TIMEZONE = "America/Toronto";
  * is the number of whole days between this date and "today" in Toronto, so the
  * launch date maps to puzzle #1. Provisional until the launch is scheduled.
  */
-export const LAUNCH_DATE = "2026-06-01";
+export const LAUNCH_DATE = "2026-06-11";
 
 export interface TrackConfig {
   id: Track;
