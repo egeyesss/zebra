@@ -32,7 +32,9 @@ export function Hud({
   const [elapsed, setElapsed] = useState(initialElapsed);
   const onTickRef = useRef(onTick);
   useEffect(() => { onTickRef.current = onTick; });
-  const finishFiredRef = useRef(false);
+  // If solved is already true on mount (restored session), mark as fired so
+  // onFinish doesn't re-trigger with elapsed=0 and overwrite the real finalTime.
+  const finishFiredRef = useRef(solved);
   const elapsedRef = useRef(initialElapsed);
   useLayoutEffect(() => {
     elapsedRef.current = elapsed;
