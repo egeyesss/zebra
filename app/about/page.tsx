@@ -26,21 +26,23 @@ export default function AboutPage() {
       <article className="flex flex-col gap-4 leading-relaxed">
         <h1 className="text-xl">About</h1>
         <p>
-          Zebra is a daily logic-grid puzzle — the Einstein riddle, one fresh
-          grid every day. Read the clues, deduce who sits where, and commit each
-          cell against the clock.
+          Zebra is a daily logic-grid puzzle inspired by the Einstein riddle, but
+          tuned down for an easier puzzle solving experience. Read the clues,
+          deduce which person sits where, and commit each cell against the clock.
         </p>
         <p>
           Two modes: <span className="text-fg-muted">☕ Coffee</span> is a 4×4
-          daily challenge. <span className="text-fg-muted">🌊 Deep</span> is a 5×5 bonus grid,
-          available every Friday for people that are about it. Every commit is final and counts;
-          your score is the number of times you changed your mind. Zero overwrites is{" "}
-          <span className="text-accent-green">Flawless</span>.
+          daily challenge. <span className="text-fg-muted">🌊 Deep</span> is a
+          5×5 bonus grid, available every Friday for people that really love hard
+          puzzles. Every commit is final and counts; your score is the number of
+          times you changed your mind. Zero overwrites is{" "}
+          <span className="text-accent-green">Flawless</span> and big score = bad.
         </p>
         <p>
           One puzzle a day, the same for everyone, resetting at midnight Toronto
-          time. No accounts, no hints beyond a single check, no live correctness
-          feedback. Just you and the grid.
+          time. No accounts (unless you want to sync streak across devices), no
+          hints beyond a single check, no live correctness feedback until the
+          whole grid is solved correctly. Just you and the grid.
         </p>
       </article>
     </div>
