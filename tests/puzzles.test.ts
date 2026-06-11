@@ -64,13 +64,13 @@ describe("loader lookups", () => {
   });
 
   it("finds puzzles by id and returns undefined for unknown ids", () => {
-    expect(getPuzzleById("mock-restaurant-001")).toBeDefined();
+    expect(getPuzzleById("003c5afa-cbc6-493a-92a2-a3fa46fba02a")).toBeDefined();
     expect(getPuzzleById("does-not-exist")).toBeUndefined();
   });
 });
 
-describe("mock fixture integrity", () => {
-  const puzzle = getPuzzleById("mock-restaurant-001")!;
+describe("puzzle integrity", () => {
+  const puzzle = getPuzzleById("003c5afa-cbc6-493a-92a2-a3fa46fba02a")!;
 
   it("has self-consistent size, solution, and metrics", () => {
     // Every category's value pool and solution row matches the grid size.
