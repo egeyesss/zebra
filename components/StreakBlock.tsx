@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 
-import { PENDING_RESULT_KEY, STREAK_STORAGE_KEY, useStreak } from "@/lib/storage/streak";
+import { dayBefore, PENDING_RESULT_KEY, STREAK_STORAGE_KEY, useStreak } from "@/lib/storage/streak";
 import { resetZoneDate } from "@/lib/data/selection";
 import type { StreakState } from "@/types/streak";
 
@@ -87,9 +87,14 @@ export function StreakBlock({ compact = false }: { compact?: boolean }) {
   }, [status]);
 
   const streak = serverStreak ?? localStreak;
-  const { current } = streak;
+  const { current, lastPlayedDate } = streak;
   const hasStreak = current > 0;
   const isSignedIn = status === "authenticated";
+
+  // True when the user has an active streak but hasn't played today yet.
+  // We compare lastPlayedDate against yesterday's date in Toronto time.
+  const today = resetZoneDate();
+  const playedYesterday = hasStreak && lastPlayedDate === dayBefore(today) && lastPlayedDate !== today;
 
   // Format "2026-06-09" → "Jun 9"
   const syncDateFormatted = syncDate
@@ -120,6 +125,21 @@ export function StreakBlock({ compact = false }: { compact?: boolean }) {
             >
               DAY STREAK
             </div>
+            {playedYesterday && (
+              <div
+                className="text-center"
+                style={{
+                  fontSize: "11px",
+                  color: "var(--accent-amber)",
+                  opacity: 0.85,
+                  maxWidth: "180px",
+                  lineHeight: 1.4,
+                  marginTop: "2px",
+                }}
+              >
+                Don&apos;t forget to play today to keep your streak going.
+              </div>
+            )}
           </>
         ) : (
           <div className="flex items-center justify-center" style={{ gap: "7px" }}>
@@ -183,6 +203,21 @@ export function StreakBlock({ compact = false }: { compact?: boolean }) {
           >
             DAY STREAK
           </div>
+          {playedYesterday && (
+            <p
+              className="text-center"
+              style={{
+                fontSize: "11px",
+                color: "var(--accent-amber)",
+                opacity: 0.85,
+                lineHeight: 1.5,
+                maxWidth: "130px",
+                margin: 0,
+              }}
+            >
+              Don&apos;t forget to play today to keep your streak going.
+            </p>
+          )}
         </>
       ) : (
         <p
