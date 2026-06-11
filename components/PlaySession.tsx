@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { ExportedPuzzle, Track } from "@/types/puzzle";
 import { LAUNCH_DATE, TRACKS } from "@/lib/config";
 
+import { track as trackEvent } from "@vercel/analytics";
 import { CellPicker } from "./CellPicker";
 import { ClueDrawer } from "./ClueDrawer";
 import { CluePanel } from "./CluePanel";
@@ -84,6 +85,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const { data: session } = useSession();
 
   function handleDnf() {
+    if (!isPreview) trackEvent("puzzle_dnf", { track, number });
     setDnf(true);
     setSelected(null);
     setCheckMode(false);
@@ -130,9 +132,19 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   // idempotent on the same date so a double-fire (strict mode etc.) is safe.
   useEffect(() => {
     if (!showResult || finalTime === null) return;
-    if (isPreview) return; // sample puzzles don't count toward streak
+    if (isPreview) return; // sample puzzles don't count toward streak or analytics
     const date = resetZoneDate();
     recordResult({ solved, date }); // localStorage (instant)
+    if (solved) {
+      trackEvent("puzzle_solved", {
+        track,
+        number,
+        time_seconds: finalTime,
+        overwrites,
+        check_used: checkUsed,
+        flawless: overwrites === 0,
+      });
+    }
     if (session) {
       // Server sync — fire-and-forget; localStorage is the fallback on failure.
       fetch("/api/streak", {
@@ -144,7 +156,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
       // Not signed in — park the result so StreakBlock can flush it on sign-in.
       localStorage.setItem(PENDING_RESULT_KEY, JSON.stringify({ solved, date }));
     }
-  }, [showResult, solved, finalTime, session, isPreview]);
+  }, [showResult, solved, finalTime, session, isPreview, track, number, overwrites, checkUsed]);
 
   // Escape key closes the about modal when it's open.
   useEffect(() => {
@@ -479,7 +491,10 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
                   {`${Math.floor(hardCapSeconds / 60)}:00 on the clock — timer starts when you do.`}
                 </p>
                 <button
-                  onClick={() => setStarted(true)}
+                  onClick={() => {
+                    if (!isPreview) trackEvent("puzzle_start", { track, number });
+                    setStarted(true);
+                  }}
                   className="rounded px-8 py-2.5 text-sm font-medium"
                   style={{
                     background: "transparent",

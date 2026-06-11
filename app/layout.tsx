@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -26,6 +27,7 @@ export default function RootLayout({
     <html lang="en" className={`${jetbrainsMono.variable} h-full antialiased`}>
       <body className="bg-bg text-fg flex min-h-full flex-col">
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { track } from "@vercel/analytics";
 
 type Mode = "coffee" | "deep";
 
@@ -130,6 +131,7 @@ export function ModeSelector({
         ) : (
           <a
             href={`/play?mode=${mode}`}
+            onClick={() => track("play_click", { mode })}
             className="btn-play rounded-full transition-colors"
             style={{
               fontFamily: "inherit",
