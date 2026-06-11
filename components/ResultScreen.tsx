@@ -78,6 +78,7 @@ interface Props {
   mode: "win" | "dnf";
   track: Track;
   number: number | null;
+  puzzleId: string;
   elapsedSeconds: number;
   overwrites: number;
   cellsFilled: number;
@@ -93,6 +94,7 @@ export function ResultScreen({
   mode,
   track,
   number,
+  puzzleId,
   elapsedSeconds,
   overwrites,
   cellsFilled,
@@ -141,6 +143,19 @@ export function ResultScreen({
     overwrittenCells,
     checkedCellKey,
   );
+
+  const shareImageUrl = (() => {
+    const p = new URLSearchParams({
+      track,
+      t: String(elapsedSeconds),
+      ow: String(overwrites),
+      dnf: mode === "dnf" ? "1" : "0",
+      cells: String(cellsFilled),
+    });
+    if (number !== null) p.set("num", String(number));
+    return `/api/share/${puzzleId}?${p.toString()}`;
+  })();
+
   const { emoji, label } = TRACKS[track];
 
   const stateColor = isWin ? "var(--accent-green)" : "var(--accent-red)";
@@ -322,20 +337,22 @@ export function ResultScreen({
           >
             {copied ? "[ copied ✓ ]" : "[ copy result ]"}
           </button>
-          <button
-            disabled
-            title="Share PNG — coming soon"
+          <a
+            href={shareImageUrl}
+            download="zebra-result.png"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
               ...pillBase,
               background: "transparent",
               boxShadow: "inset 0 0 0 1px var(--border)",
               color: "var(--fg-muted)",
-              opacity: 0.4,
-              cursor: "not-allowed",
+              textDecoration: "none",
+              display: "inline-block",
             }}
           >
             [ PNG ↗ ]
-          </button>
+          </a>
         </div>
 
         {/* View solution */}

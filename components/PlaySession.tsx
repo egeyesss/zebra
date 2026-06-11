@@ -448,6 +448,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
           mode={solved ? "win" : "dnf"}
           track={track}
           number={number}
+          puzzleId={puzzle.id}
           elapsedSeconds={finalTime}
           overwrites={overwrites}
           cellsFilled={Object.keys(committed).length}
