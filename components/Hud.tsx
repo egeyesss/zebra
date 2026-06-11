@@ -7,6 +7,10 @@ interface Props {
   solved: boolean;
   hardCapSeconds: number;
   overwrites: number;
+  /** Seed the timer from a restored session (default 0). */
+  initialElapsed?: number;
+  /** Called every second with the current elapsed value. */
+  onTick?: (elapsed: number) => void;
   /** Called once when the timer freezes (solve), with the final elapsed seconds. */
   onFinish?: (elapsedSeconds: number) => void;
 }
@@ -21,11 +25,15 @@ export function Hud({
   solved,
   hardCapSeconds,
   overwrites,
+  initialElapsed = 0,
+  onTick,
   onFinish,
 }: Props) {
-  const [elapsed, setElapsed] = useState(0);
+  const [elapsed, setElapsed] = useState(initialElapsed);
+  const onTickRef = useRef(onTick);
+  useEffect(() => { onTickRef.current = onTick; });
   const finishFiredRef = useRef(false);
-  const elapsedRef = useRef(0);
+  const elapsedRef = useRef(initialElapsed);
   useLayoutEffect(() => {
     elapsedRef.current = elapsed;
   }, [elapsed]);
@@ -34,7 +42,11 @@ export function Hud({
   useEffect(() => {
     if (!started || solved) return;
     const id = setInterval(() => {
-      setElapsed((prev) => prev + 1);
+      setElapsed((prev) => {
+        const next = prev + 1;
+        onTickRef.current?.(next);
+        return next;
+      });
     }, 1000);
     return () => clearInterval(id);
   }, [started, solved]);

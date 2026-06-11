@@ -17,6 +17,7 @@ import { TrackBadge } from "./TrackBadge";
 import { Wordmark } from "./Wordmark";
 import { useSession } from "next-auth/react";
 import { PENDING_RESULT_KEY, recordResult, useStreak } from "@/lib/storage/streak";
+import { loadSession, saveSession } from "@/lib/storage/session";
 import { resetZoneDate } from "@/lib/data/selection";
 
 interface Props {
@@ -24,6 +25,11 @@ interface Props {
   isPreview: boolean;
   number: number | null;
   track: Track;
+}
+
+function formatTime(s: number): string {
+  const m = Math.floor(s / 60);
+  return `${String(m).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 }
 
 // Build "Who drinks latte?" from puzzle.question + the category's predicate template.
@@ -55,25 +61,83 @@ function checkSolved(
 }
 
 export function PlaySession({ puzzle, isPreview, number, track }: Props) {
-  const [started, setStarted] = useState(false);
-  const [committed, setCommitted] = useState<Record<string, string>>({});
+  // Each lazy initializer below calls this helper once on mount.
+  // loadSession is a tiny JSON.parse (< 1 ms) so calling it per-useState is fine.
+  function initSession() { return isPreview ? null : loadSession(puzzle.id, resetZoneDate()); }
+
+  const [started, setStarted] = useState(() => {
+    const s = initSession();
+    return Boolean(s?.started && s?.solved && s?.finalTime !== null);
+  });
+  const [committed, setCommitted] = useState<Record<string, string>>(() => {
+    const s = initSession();
+    return s?.started ? s.committed : {};
+  });
   const [selected, setSelected] = useState<{
     category: string;
     position: number;
   } | null>(null);
-  const [overwrittenCells, setOverwrittenCells] = useState<Set<string>>(
-    new Set(),
-  );
-  const [overwrites, setOverwrites] = useState(0);
+  const [overwrittenCells, setOverwrittenCells] = useState<Set<string>>(() => {
+    const s = initSession();
+    return new Set(s?.started ? s.overwrittenCells : []);
+  });
+  const [overwrites, setOverwrites] = useState(() => {
+    const s = initSession();
+    return s?.started ? s.overwrites : 0;
+  });
   const [justCommitted, setJustCommitted] = useState<string | null>(null);
-  const [solved, setSolved] = useState(false);
-  const [finalTime, setFinalTime] = useState<number | null>(null);
-  const [showResult, setShowResult] = useState(false);
+  const [solved, setSolved] = useState(() => {
+    const s = initSession();
+    return Boolean(s?.started && s?.solved && s?.finalTime !== null);
+  });
+  const [finalTime, setFinalTime] = useState<number | null>(() => {
+    const s = initSession();
+    return s?.started && s?.solved ? s.finalTime : null;
+  });
+  const [showResult, setShowResult] = useState(() => {
+    const s = initSession();
+    return Boolean(s?.started && s?.solved && s?.finalTime !== null);
+  });
   const [noteMode, setNoteMode] = useState(false);
-  const [notes, setNotes] = useState<Record<string, Set<string>>>({});
+  const [notes, setNotes] = useState<Record<string, Set<string>>>(() => {
+    const s = initSession();
+    return Object.fromEntries(
+      Object.entries(s?.started ? (s.notes ?? {}) : {}).map(([k, v]) => [k, new Set(v)])
+    );
+  });
   const [checkMode, setCheckMode] = useState(false);
-  const [checkUsed, setCheckUsed] = useState(false);
-  const [checkedCell, setCheckedCell] = useState<{ key: string; value: string; correct: boolean } | null>(null);
+  const [checkUsed, setCheckUsed] = useState(() => {
+    const s = initSession();
+    return s?.started ? s.checkUsed : false;
+  });
+  const [checkedCell, setCheckedCell] = useState<{ key: string; value: string; correct: boolean } | null>(() => {
+    const s = initSession();
+    return s?.started ? s.checkedCell : null;
+  });
+
+  // Session persistence
+  const [showWelcomeBack, setShowWelcomeBack] = useState(() => {
+    const s = initSession();
+    return Boolean(s?.started && !s?.solved);
+  });
+  const [restoredElapsed] = useState(() => {
+    const s = initSession();
+    return s?.started && !s?.solved ? s.elapsedSeconds : 0;
+  });
+  // Bumped every 10 ticks to trigger the save effect with the latest elapsed.
+  const [saveElapsedTick, setSaveElapsedTick] = useState(0);
+  // Tracks the latest elapsed second so saves include current timer value.
+  const latestElapsedRef = useRef((() => {
+    const s = initSession();
+    return s?.started && !s?.solved ? s.elapsedSeconds : 0;
+  })());
+  // Counts ticks so we only write elapsed to storage every 10 seconds.
+  const tickCountRef = useRef(0);
+  // Set when restoring a solved session — prevents re-firing analytics/streak on the result effect.
+  const isRestoredResultRef = useRef((() => {
+    const s = initSession();
+    return Boolean(s?.started && s?.solved && s?.finalTime !== null);
+  })());
 
   // Category of the puzzle's hidden answer — checking any cell in this row
   // would let the player eliminate options to find the answer, so it's blocked.
@@ -83,9 +147,59 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const streak = useStreak();
   const { data: session } = useSession();
 
+  // Persist session whenever meaningful gameplay state changes, and every
+  // 10 timer ticks (via saveElapsedTick). Skips saves when not yet started
+  // (welcome-back or fresh start) and after solve (handleFinish saves final state).
+  useEffect(() => {
+    if (!started || solved || isPreview) return;
+    const today = resetZoneDate();
+    saveSession({
+      v: 1,
+      puzzleId: puzzle.id,
+      date: today,
+      elapsedSeconds: latestElapsedRef.current,
+      started: true,
+      committed,
+      overwrites,
+      overwrittenCells: [...overwrittenCells],
+      notes: Object.fromEntries(Object.entries(notes).map(([k, v]) => [k, [...v]])),
+      checkUsed,
+      checkedCell,
+      solved,
+      finalTime,
+    });
+  }, [committed, overwrites, checkUsed, checkedCell, notes, started, solved, finalTime, saveElapsedTick, isPreview, overwrittenCells, puzzle.id]);
+
+  function handleTick(elapsed: number) {
+    latestElapsedRef.current = elapsed;
+    tickCountRef.current += 1;
+    if (tickCountRef.current % 10 === 0) {
+      setSaveElapsedTick(elapsed);
+    }
+  }
+
   function handleFinish(elapsedSeconds: number) {
     setFinalTime(elapsedSeconds);
     setCheckMode(false);
+    // Persist the completed session so a refresh after solve restores the result.
+    if (!isPreview) {
+      const today = resetZoneDate();
+      saveSession({
+        v: 1,
+        puzzleId: puzzle.id,
+        date: today,
+        elapsedSeconds,
+        started: true,
+        committed,
+        overwrites,
+        overwrittenCells: [...overwrittenCells],
+        notes: Object.fromEntries(Object.entries(notes).map(([k, v]) => [k, [...v]])),
+        checkUsed,
+        checkedCell,
+        solved: true,
+        finalTime: elapsedSeconds,
+      });
+    }
     // Small delay so the player sees their last commit flash before the overlay appears.
     setTimeout(() => setShowResult(true), 600);
   }
@@ -125,6 +239,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   useEffect(() => {
     if (!showResult || finalTime === null) return;
     if (isPreview) return; // sample puzzles don't count toward streak or analytics
+    if (isRestoredResultRef.current) return; // streak + analytics already recorded in a prior session
     const date = resetZoneDate();
     recordResult({ solved, date }); // localStorage (instant)
     if (solved) {
@@ -378,10 +493,13 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
           </div>
         </div>
         <Hud
+          key={restoredElapsed}
           started={started}
           solved={solved}
           hardCapSeconds={hardCapSeconds}
           overwrites={overwrites}
+          initialElapsed={restoredElapsed}
+          onTick={handleTick}
           onFinish={handleFinish}
         />
         <div className="flex w-full items-center justify-between text-sm lg:w-auto lg:justify-center lg:gap-3">
@@ -471,7 +589,36 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
 
       <main className="flex flex-1 flex-col items-center gap-6 pt-4 px-4 pb-28 lg:min-h-0 lg:flex-row lg:items-start lg:justify-center lg:pb-4">
         <div className="relative flex w-full max-w-2xl flex-col gap-3">
-          {!started ? (
+          {!started && showWelcomeBack ? (
+            <div className="flex flex-col items-center gap-8 px-4 py-16">
+              <div className="flex flex-col items-center gap-2 text-center">
+                <p className="text-fg font-medium" style={{ fontSize: "20px" }}>
+                  Welcome back
+                </p>
+                <p className="text-fg-muted text-sm">
+                  {Object.keys(committed).length} of{" "}
+                  {puzzle.size * Object.keys(puzzle.theme.attributes).length} cells filled
+                  {restoredElapsed > 0 && ` · ${formatTime(restoredElapsed)} elapsed`}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowWelcomeBack(false);
+                  setStarted(true);
+                }}
+                className="rounded px-8 py-2.5 text-sm font-medium"
+                style={{
+                  background: "transparent",
+                  border: "1.5px solid var(--accent-green)",
+                  color: "var(--accent-green)",
+                  cursor: "pointer",
+                  letterSpacing: "0.12em",
+                }}
+              >
+                continue
+              </button>
+            </div>
+          ) : !started ? (
             <div className="flex flex-col items-center gap-8 px-4 py-16">
               {questionText && (
                 <p
