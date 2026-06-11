@@ -130,6 +130,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   // idempotent on the same date so a double-fire (strict mode etc.) is safe.
   useEffect(() => {
     if (!showResult || finalTime === null) return;
+    if (isPreview) return; // sample puzzles don't count toward streak
     const date = resetZoneDate();
     recordResult({ solved, date }); // localStorage (instant)
     if (session) {
@@ -143,7 +144,7 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
       // Not signed in — park the result so StreakBlock can flush it on sign-in.
       localStorage.setItem(PENDING_RESULT_KEY, JSON.stringify({ solved, date }));
     }
-  }, [showResult, solved, finalTime, session]);
+  }, [showResult, solved, finalTime, session, isPreview]);
 
   // Escape key closes the about modal when it's open.
   useEffect(() => {

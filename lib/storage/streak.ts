@@ -43,7 +43,7 @@ function subscribe(onChange: () => void): () => void {
 }
 
 /** Returns the YYYY-MM-DD string for the day before dateStr. */
-function dayBefore(dateStr: string): string {
+export function dayBefore(dateStr: string): string {
   // Parse as UTC noon to dodge DST edge cases when subtracting a day.
   const d = new Date(dateStr + "T12:00:00Z");
   d.setUTCDate(d.getUTCDate() - 1);
