@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 import type { ExportedPuzzle, Track } from "@/types/puzzle";
-import { LAUNCH_DATE, TRACKS } from "@/lib/config";
+import { LAUNCH_DATE, RESET_TIMEZONE, TRACKS } from "@/lib/config";
 
 import { track as trackEvent } from "@vercel/analytics";
 import { CellPicker } from "./CellPicker";
@@ -147,6 +147,45 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   const streak = useStreak();
   const { data: session } = useSession();
 
+  // True when the player has already completed today's puzzle but has no
+  // active session to restore (cleared localStorage, different device, etc.).
+  // We use the streak's lastPlayedDate as the signal since recordResult only
+  // fires on a solve — it's not set for mid-puzzle exits.
+  const alreadyDoneToday =
+    !isPreview &&
+    !started &&
+    !showResult &&
+    !showWelcomeBack &&
+    streak.lastPlayedDate === resetZoneDate();
+
+  // Countdown to midnight (Toronto) shown on the already-done screen.
+  const [nextPuzzleCountdown, setNextPuzzleCountdown] = useState("");
+  useEffect(() => {
+    if (!alreadyDoneToday) return;
+    function tick() {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: RESET_TIMEZONE,
+        hour12: false,
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }).formatToParts(new Date());
+      const get = (t: string) =>
+        parseInt(parts.find((p) => p.type === t)?.value ?? "0", 10);
+      const h = get("hour") % 24;
+      const total = 86400 - (h * 3600 + get("minute") * 60 + get("second"));
+      const hh = Math.floor(total / 3600);
+      const mm = Math.floor((total % 3600) / 60);
+      const ss = total % 60;
+      setNextPuzzleCountdown(
+        `${String(hh).padStart(2, "0")}h ${String(mm).padStart(2, "0")}m ${String(ss).padStart(2, "0")}s`,
+      );
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [alreadyDoneToday]);
+
   // Persist session whenever meaningful gameplay state changes, and every
   // 10 timer ticks (via saveElapsedTick). Skips saves when not yet started
   // (welcome-back or fresh start) and after solve (handleFinish saves final state).
@@ -222,6 +261,18 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
       });
     }
     setCommitted(solution);
+  }
+
+  // Called from the already-done screen — shows the completed grid read-only.
+  // setSolved(true) locks the grid and stops the timer (elapsed stays at 00:00).
+  function handleAdmirePuzzle() {
+    const solution: Record<string, string> = {};
+    for (const [cat, vals] of Object.entries(puzzle.solution.assignments)) {
+      vals.forEach((val, i) => { solution[`${cat}:${i + 1}`] = val; });
+    }
+    setCommitted(solution);
+    setSolved(true);
+    setStarted(true);
   }
 
   const questionText = buildQuestionText(puzzle);
@@ -589,7 +640,63 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
 
       <main className="flex flex-1 flex-col items-center gap-6 pt-4 px-4 pb-28 lg:min-h-0 lg:flex-row lg:items-start lg:justify-center lg:pb-4">
         <div className="relative flex w-full max-w-2xl flex-col gap-3">
-          {!started && showWelcomeBack ? (
+          {alreadyDoneToday ? (
+            <div className="flex flex-col items-center gap-6 px-4 py-16 text-center">
+              <div
+                style={{
+                  fontSize: "11px",
+                  letterSpacing: "0.25em",
+                  color: "var(--accent-green)",
+                }}
+              >
+                SOLVED
+              </div>
+              <p className="text-fg font-medium" style={{ fontSize: "20px" }}>
+                Today&apos;s puzzle is done.
+              </p>
+              <p className="text-fg-muted text-sm" style={{ maxWidth: "30ch" }}>
+                You&apos;ve already solved today&apos;s {TRACKS[track].emoji}{" "}
+                {TRACKS[track].label}. Come back for the next one.
+              </p>
+              {nextPuzzleCountdown && (
+                <div>
+                  <p
+                    style={{
+                      fontSize: "10px",
+                      letterSpacing: "0.25em",
+                      color: "var(--fg-muted)",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    NEXT PUZZLE IN
+                  </p>
+                  <p
+                    className="tabular-nums font-medium"
+                    style={{ fontSize: "22px", color: "var(--accent-amber)" }}
+                  >
+                    {nextPuzzleCountdown}
+                  </p>
+                </div>
+              )}
+              <button
+                onClick={handleAdmirePuzzle}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--fg-muted)",
+                  fontSize: "11px",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  textUnderlineOffset: "3px",
+                  opacity: 0.5,
+                  padding: 0,
+                  fontFamily: "inherit",
+                }}
+              >
+                view solution →
+              </button>
+            </div>
+          ) : !started && showWelcomeBack ? (
             <div className="flex flex-col items-center gap-8 px-4 py-16">
               <div className="flex flex-col items-center gap-2 text-center">
                 <p className="text-fg font-medium" style={{ fontSize: "20px" }}>
