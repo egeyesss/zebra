@@ -13,6 +13,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
           fontStyle: "italic",
           color: "var(--accent-amber)",
           letterSpacing: 0,
+          marginRight: "4px",
         }}
       >
         9
