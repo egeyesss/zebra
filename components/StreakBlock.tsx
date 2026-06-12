@@ -71,13 +71,21 @@ export function StreakBlock({ compact = false }: { compact?: boolean }) {
           }),
         });
       } else if (server.current > 0 || server.lastPlayedDate !== null) {
-        // Server has data — it wins. Update both the display and localStorage.
-        setServerStreak(server);
-        const serialized = JSON.stringify(server);
-        localStorage.setItem(STREAK_STORAGE_KEY, serialized);
-        window.dispatchEvent(
-          new StorageEvent("storage", { key: STREAK_STORAGE_KEY }),
-        );
+        // Server has data — it wins, but only when it's at least as recent as
+        // local. The solve POST from PlaySession is fire-and-forget; if this GET
+        // races ahead of that POST the server will still hold yesterday's streak.
+        // Letting a stale server response overwrite local would drop the
+        // just-earned increment, so we skip the overwrite when local is newer.
+        const serverIsAhead =
+          (server.lastPlayedDate ?? "") >= (local.lastPlayedDate ?? "");
+        if (serverIsAhead) {
+          setServerStreak(server);
+          const serialized = JSON.stringify(server);
+          localStorage.setItem(STREAK_STORAGE_KEY, serialized);
+          window.dispatchEvent(
+            new StorageEvent("storage", { key: STREAK_STORAGE_KEY }),
+          );
+        }
       }
       setSynced(true);
       setSyncDate(resetZoneDate());
