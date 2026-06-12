@@ -21,6 +21,7 @@ export function ModeSelector({
   isFriday: boolean;
 }) {
   const [mode, setMode] = useState<Mode>(initialMode);
+  const [langHover, setLangHover] = useState<"jp" | "tr" | null>(null);
 
   function pick(m: Mode, e: React.MouseEvent<HTMLAnchorElement>) {
     e.preventDefault();
@@ -173,65 +174,91 @@ export function ModeSelector({
         </a>
 
         {/* Language selector */}
-        <div
-          style={{
-            display: "inline-flex",
-            boxShadow: "inset 0 0 0 1px var(--border)",
-            borderRadius: "9999px",
-            overflow: "hidden",
-          }}
-        >
-          <button
-            type="button"
-            aria-label="English"
+        <div style={{ position: "relative", display: "inline-flex" }}>
+          {/* Tooltip — appears above the hovered flag */}
+          {langHover && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: "calc(100% + 7px)",
+                left: langHover === "jp" ? "50%" : "calc(50% + 24px)",
+                transform: "translateX(-50%)",
+                background: "var(--bg-elev-2)",
+                boxShadow: "inset 0 0 0 1px var(--border), 0 4px 16px rgba(0,0,0,0.4)",
+                borderRadius: "6px",
+                padding: "3px 10px",
+                fontSize: "11px",
+                color: "var(--fg-muted)",
+                whiteSpace: "nowrap",
+                pointerEvents: "none",
+                letterSpacing: "0.06em",
+              }}
+            >
+              coming soon
+            </div>
+          )}
+          <div
             style={{
-              background: "transparent",
-              border: "none",
-              padding: "5px 14px",
-              fontSize: "18px",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              lineHeight: 1,
+              display: "inline-flex",
+              boxShadow: "inset 0 0 0 1px var(--border)",
+              borderRadius: "9999px",
+              overflow: "hidden",
             }}
           >
-            🇬🇧
-          </button>
-          <button
-            type="button"
-            title="Coming soon..."
-            aria-label="Japanese — coming soon"
-            style={{
-              background: "transparent",
-              border: "none",
-              borderLeft: "1px solid var(--border)",
-              padding: "5px 14px",
-              fontSize: "18px",
-              opacity: 0.3,
-              cursor: "default",
-              fontFamily: "inherit",
-              lineHeight: 1,
-            }}
-          >
-            🇯🇵
-          </button>
-          <button
-            type="button"
-            title="Coming soon..."
-            aria-label="Turkish — coming soon"
-            style={{
-              background: "transparent",
-              border: "none",
-              borderLeft: "1px solid var(--border)",
-              padding: "5px 14px",
-              fontSize: "18px",
-              opacity: 0.3,
-              cursor: "default",
-              fontFamily: "inherit",
-              lineHeight: 1,
-            }}
-          >
-            🇹🇷
-          </button>
+            <button
+              type="button"
+              aria-label="English"
+              style={{
+                background: "transparent",
+                border: "none",
+                padding: "5px 14px",
+                fontSize: "18px",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                lineHeight: 1,
+              }}
+            >
+              🇬🇧
+            </button>
+            <button
+              type="button"
+              aria-label="Japanese — coming soon"
+              onMouseEnter={() => setLangHover("jp")}
+              onMouseLeave={() => setLangHover(null)}
+              style={{
+                background: "transparent",
+                border: "none",
+                borderLeft: "1px solid var(--border)",
+                padding: "5px 14px",
+                fontSize: "18px",
+                opacity: 0.3,
+                cursor: "default",
+                fontFamily: "inherit",
+                lineHeight: 1,
+              }}
+            >
+              🇯🇵
+            </button>
+            <button
+              type="button"
+              aria-label="Turkish — coming soon"
+              onMouseEnter={() => setLangHover("tr")}
+              onMouseLeave={() => setLangHover(null)}
+              style={{
+                background: "transparent",
+                border: "none",
+                borderLeft: "1px solid var(--border)",
+                padding: "5px 14px",
+                fontSize: "18px",
+                opacity: 0.3,
+                cursor: "default",
+                fontFamily: "inherit",
+                lineHeight: 1,
+              }}
+            >
+              🇹🇷
+            </button>
+          </div>
         </div>
       </div>
     </>
