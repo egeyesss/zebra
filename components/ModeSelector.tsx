@@ -94,7 +94,10 @@ export function ModeSelector({
         className="w-full flex flex-col items-center"
         style={{ gap: "10px", marginTop: "clamp(8px, 1.5dvh, 20px)", maxWidth: "480px" }}
       >
-        <div className="w-full flex flex-wrap justify-center px-4" style={{ gap: "14px" }}>
+        {/* Each button takes an equal half of the container so the gap
+            between them sits exactly on the page's vertical centerline,
+            matching the Coffee/Deep tab divider above. */}
+        <div className="w-full flex px-4" style={{ gap: "14px" }}>
           <a
             href="#howto"
             className="btn-ghost rounded-full text-fg transition-colors"
@@ -102,12 +105,15 @@ export function ModeSelector({
               fontFamily: "inherit",
               fontSize: "16px",
               letterSpacing: "0.02em",
-              padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
+              padding: "clamp(10px, 1.5dvh, 16px) clamp(12px, 4vw, 40px)",
               background: "transparent",
               textDecoration: "none",
               boxShadow: "inset 0 0 0 1px var(--border)",
+              flex: "1 1 0",
               display: "inline-flex",
               alignItems: "center",
+              justifyContent: "center",
+              whiteSpace: "nowrap",
             }}
           >
             how to play
@@ -118,13 +124,15 @@ export function ModeSelector({
                 fontFamily: "inherit",
                 fontSize: "16px",
                 letterSpacing: "0.02em",
-                padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
+                padding: "clamp(10px, 1.5dvh, 16px) clamp(12px, 4vw, 40px)",
                 color: "var(--fg-muted)",
                 boxShadow: "inset 0 0 0 1.5px var(--border)",
                 opacity: 0.35,
                 borderRadius: "9999px",
+                flex: "1 1 0",
                 display: "inline-flex",
                 alignItems: "center",
+                justifyContent: "center",
                 cursor: "default",
               }}
             >
@@ -139,13 +147,15 @@ export function ModeSelector({
                 fontFamily: "inherit",
                 fontSize: "16px",
                 letterSpacing: "0.02em",
-                padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
+                padding: "clamp(10px, 1.5dvh, 16px) clamp(12px, 4vw, 40px)",
                 color: "var(--accent-green)",
                 boxShadow: "inset 0 0 0 1.5px var(--accent-green)",
                 background: "rgba(109,191,109,0.08)",
                 textDecoration: "none",
+                flex: "1 1 0",
                 display: "inline-flex",
                 alignItems: "center",
+                justifyContent: "center",
               }}
             >
               play
