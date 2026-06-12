@@ -171,6 +171,68 @@ export function ModeSelector({
         >
           contributions
         </a>
+
+        {/* Language selector */}
+        <div
+          style={{
+            display: "inline-flex",
+            boxShadow: "inset 0 0 0 1px var(--border)",
+            borderRadius: "9999px",
+            overflow: "hidden",
+          }}
+        >
+          <button
+            type="button"
+            aria-label="English"
+            style={{
+              background: "transparent",
+              border: "none",
+              padding: "5px 14px",
+              fontSize: "18px",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              lineHeight: 1,
+            }}
+          >
+            🇬🇧
+          </button>
+          <button
+            type="button"
+            title="Coming soon..."
+            aria-label="Japanese — coming soon"
+            style={{
+              background: "transparent",
+              border: "none",
+              borderLeft: "1px solid var(--border)",
+              padding: "5px 14px",
+              fontSize: "18px",
+              opacity: 0.3,
+              cursor: "default",
+              fontFamily: "inherit",
+              lineHeight: 1,
+            }}
+          >
+            🇯🇵
+          </button>
+          <button
+            type="button"
+            title="Coming soon..."
+            aria-label="Turkish — coming soon"
+            style={{
+              background: "transparent",
+              border: "none",
+              borderLeft: "1px solid var(--border)",
+              padding: "5px 14px",
+              fontSize: "18px",
+              opacity: 0.3,
+              cursor: "default",
+              fontFamily: "inherit",
+              lineHeight: 1,
+            }}
+          >
+            🇹🇷
+          </button>
+        </div>
       </div>
     </>
   );
