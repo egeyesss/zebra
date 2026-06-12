@@ -5,6 +5,7 @@ import {
   recordServerResult,
 } from "@/lib/db";
 import { resetZoneDate } from "@/lib/data/selection";
+import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
 import type { StreakState } from "@/types/streak";
 
 export async function GET() {
@@ -12,6 +13,8 @@ export async function GET() {
   if (!session?.user?.id) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
+  const limit = rateLimit(`streak:get:${session.user.id}`, 60, 60_000);
+  if (!limit.ok) return tooManyRequests(limit.retryAfterSeconds);
   try {
     const streak = await getServerStreak(session.user.id);
     return Response.json(streak);
@@ -26,6 +29,9 @@ export async function POST(request: Request) {
   if (!session?.user?.id) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const limit = rateLimit(`streak:post:${session.user.id}`, 20, 60_000);
+  if (!limit.ok) return tooManyRequests(limit.retryAfterSeconds);
 
   let body: unknown;
   try {

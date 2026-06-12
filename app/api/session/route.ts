@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { getServerPuzzleSession, saveServerPuzzleSession } from "@/lib/db";
 import { resetZoneDate } from "@/lib/data/selection";
+import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
 import type { PuzzleSession } from "@/lib/storage/session";
 
 export async function GET(request: Request) {
@@ -8,6 +9,9 @@ export async function GET(request: Request) {
   if (!session?.user?.id) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const limit = rateLimit(`session:get:${session.user.id}`, 60, 60_000);
+  if (!limit.ok) return tooManyRequests(limit.retryAfterSeconds);
 
   const { searchParams } = new URL(request.url);
   const puzzleId = searchParams.get("puzzleId");
@@ -29,6 +33,9 @@ export async function POST(request: Request) {
   if (!session?.user?.id) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  const limit = rateLimit(`session:post:${session.user.id}`, 30, 60_000);
+  if (!limit.ok) return tooManyRequests(limit.retryAfterSeconds);
 
   let body: unknown;
   try {
