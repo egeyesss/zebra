@@ -59,7 +59,7 @@ export function ModeSelector({
               transition: "background .15s, color .15s",
               borderRadius:
                 idx === 0 ? "9999px 0 0 9999px" : "0 9999px 9999px 0",
-              flex: 1,
+              flex: "0 0 50%",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
