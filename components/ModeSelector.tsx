@@ -89,12 +89,12 @@ export function ModeSelector({
         ))}
       </div>
 
-      {/* Action links */}
+      {/* Action links — same maxWidth as the tab bar so everything shares a center */}
       <div
-        className="mx-4 flex flex-col items-center"
-        style={{ gap: "10px", marginTop: "clamp(8px, 1.5dvh, 20px)" }}
+        className="w-full flex flex-col items-center"
+        style={{ gap: "10px", marginTop: "clamp(8px, 1.5dvh, 20px)", maxWidth: "480px" }}
       >
-        <div className="flex flex-wrap justify-center" style={{ gap: "14px" }}>
+        <div className="w-full flex flex-wrap justify-center px-4" style={{ gap: "14px" }}>
           <a
             href="#howto"
             className="btn-ghost rounded-full text-fg transition-colors"
