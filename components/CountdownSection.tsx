@@ -101,20 +101,11 @@ export function CountdownSection({
   }, [isFriday]);
 
   const number = puzzleNumber();
-  const modeLabel =
-    mode === "coffee" ? (
-      <><span style={{ fontSize: "1.3em", marginRight: "0.35em" }}>☕️</span>Coffee · 4 × 4</>
-    ) : (
-      <><span style={{ fontSize: "1.3em", marginRight: "0.35em" }}>🌊</span>Deep · 5 × 5</>
-    );
 
   // Deep selected on a non-Friday — show countdown to next Deep
   if (mode === "deep" && !isFriday) {
     return (
       <div className="text-center" style={{ lineHeight: 1.7 }}>
-        <div className="text-fg-muted" style={{ fontSize: "clamp(11px, 1.7dvh, 15px)" }}>
-          {modeLabel}
-        </div>
         <div className="text-fg-muted" style={{ fontSize: "clamp(11px, 1.7dvh, 14px)", opacity: 0.6 }}>
           available every Friday
         </div>
@@ -146,9 +137,6 @@ export function CountdownSection({
           No. {String(number).padStart(3, "0")}
         </div>
       )}
-      <div className="text-fg-muted" style={{ fontSize: "clamp(11px, 1.7dvh, 15px)" }}>
-        {modeLabel}
-      </div>
       {countdown && (
         <div
           className="text-fg-muted mt-1"

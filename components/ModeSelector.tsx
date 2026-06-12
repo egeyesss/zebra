@@ -88,7 +88,7 @@ export function ModeSelector({
         ))}
       </div>
 
-      {/* Action links */}
+      {/* Action links — flex-wrap so contributions naturally falls to its own centered line */}
       <div
         className="mx-4 flex flex-wrap justify-center"
         style={{ gap: "14px", marginTop: "clamp(8px, 1.5dvh, 20px)" }}
@@ -149,10 +149,7 @@ export function ModeSelector({
             play
           </a>
         )}
-      </div>
-
-      {/* Contributions — desktop only, sits below the main action row */}
-      <div className="hidden lg:flex justify-center" style={{ marginTop: "10px" }}>
+        {/* Contributions — wraps to its own centered line since how-to-play + play fill the row */}
         <a
           href="#contributions"
           className="rounded-full transition-colors"
