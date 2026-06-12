@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 import { getPuzzleById } from "@/lib/data/puzzles";
 import { TRACKS, RESET_TIMEZONE } from "@/lib/config";
+import { clientIp, rateLimit, tooManyRequests } from "@/lib/rate-limit";
 import type { Track } from "@/types/puzzle";
 
 // Module-level cache — Fluid Compute reuses instances across requests.
@@ -44,6 +45,11 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  // Public and expensive (renders a 1080×1080 PNG per hit), so guard by IP
+  // before doing any work. 20 images/minute is generous for a real sharer.
+  const limit = rateLimit(`share:${clientIp(request)}`, 20, 60_000);
+  if (!limit.ok) return tooManyRequests(limit.retryAfterSeconds);
+
   const { id } = await params;
 
   if (!getPuzzleById(id)) {
