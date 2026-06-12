@@ -88,68 +88,78 @@ export function ModeSelector({
         ))}
       </div>
 
-      {/* Action links — flex-wrap so contributions naturally falls to its own centered line */}
+      {/* Action links */}
       <div
-        className="mx-4 flex flex-wrap justify-center"
-        style={{ gap: "14px", marginTop: "clamp(8px, 1.5dvh, 20px)" }}
+        className="mx-4 flex flex-col items-center"
+        style={{ gap: "10px", marginTop: "clamp(8px, 1.5dvh, 20px)" }}
       >
-        <a
-          href="#howto"
-          className="btn-ghost rounded-full text-fg transition-colors"
-          style={{
-            fontFamily: "inherit",
-            fontSize: "16px",
-            letterSpacing: "0.02em",
-            padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
-            background: "transparent",
-            textDecoration: "none",
-            boxShadow: "inset 0 0 0 1px var(--border)",
-            display: "inline-flex",
-            alignItems: "center",
-          }}
-        >
-          how to play
-        </a>
-        {deepUnavailable ? (
-          <span
-            style={{
-              fontFamily: "inherit",
-              fontSize: "16px",
-              letterSpacing: "0.02em",
-              padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
-              color: "var(--fg-muted)",
-              boxShadow: "inset 0 0 0 1.5px var(--border)",
-              opacity: 0.4,
-              borderRadius: "9999px",
-              display: "inline-flex",
-              alignItems: "center",
-              cursor: "default",
-            }}
-          >
-            Fridays only
-          </span>
-        ) : (
+        {/* How to play + play/Fridays only — always on one line, split width equally */}
+        <div className="flex w-full" style={{ gap: "14px" }}>
           <a
-            href={`/play?mode=${mode}`}
-            onClick={() => track("play_click", { mode })}
-            className="btn-play rounded-full transition-colors"
+            href="#howto"
+            className="btn-ghost rounded-full text-fg transition-colors"
             style={{
+              flex: 1,
               fontFamily: "inherit",
               fontSize: "16px",
               letterSpacing: "0.02em",
-              padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
-              color: "var(--accent-green)",
-              boxShadow: "inset 0 0 0 1.5px var(--accent-green)",
-              background: "rgba(109,191,109,0.08)",
+              padding: "clamp(10px, 1.5dvh, 16px) 0",
+              background: "transparent",
               textDecoration: "none",
-              display: "inline-flex",
+              boxShadow: "inset 0 0 0 1px var(--border)",
+              display: "flex",
               alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            play
+            how to play
           </a>
-        )}
-        {/* Contributions — wraps to its own centered line since how-to-play + play fill the row */}
+          {deepUnavailable ? (
+            <span
+              style={{
+                flex: 1,
+                fontFamily: "inherit",
+                fontSize: "16px",
+                letterSpacing: "0.02em",
+                padding: "clamp(10px, 1.5dvh, 16px) 0",
+                color: "var(--fg-muted)",
+                boxShadow: "inset 0 0 0 1.5px var(--border)",
+                opacity: 0.4,
+                borderRadius: "9999px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "default",
+              }}
+            >
+              Fridays only
+            </span>
+          ) : (
+            <a
+              href={`/play?mode=${mode}`}
+              onClick={() => track("play_click", { mode })}
+              className="btn-play rounded-full transition-colors"
+              style={{
+                flex: 1,
+                fontFamily: "inherit",
+                fontSize: "16px",
+                letterSpacing: "0.02em",
+                padding: "clamp(10px, 1.5dvh, 16px) 0",
+                color: "var(--accent-green)",
+                boxShadow: "inset 0 0 0 1.5px var(--accent-green)",
+                background: "rgba(109,191,109,0.08)",
+                textDecoration: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              play
+            </a>
+          )}
+        </div>
+
+        {/* Contributions — centered below */}
         <a
           href="#contributions"
           className="rounded-full transition-colors"
