@@ -187,17 +187,31 @@ export default async function LandingPage({
           className="flex flex-col items-center gap-2"
           style={{ fontSize: "13px" }}
         >
-          <a
-            href="/about"
-            style={{
-              color: "var(--fg-muted)",
-              textDecoration: "none",
-              letterSpacing: "0.15em",
-              opacity: 0.6,
-            }}
-          >
-            about
-          </a>
+          <div className="flex items-center gap-4">
+            <a
+              href="/about"
+              style={{
+                color: "var(--fg-muted)",
+                textDecoration: "none",
+                letterSpacing: "0.15em",
+                opacity: 0.6,
+              }}
+            >
+              about
+            </a>
+            <a
+              href="#contributions"
+              className="hidden lg:inline"
+              style={{
+                color: "var(--fg-muted)",
+                textDecoration: "none",
+                letterSpacing: "0.15em",
+                opacity: 0.6,
+              }}
+            >
+              contributions
+            </a>
+          </div>
           <div
             className="text-center text-fg-muted"
             style={{ letterSpacing: "0.2em", opacity: 0.45 }}
@@ -213,7 +227,7 @@ export default async function LandingPage({
           it lives in the HTML and is never processed by the optimizer.
           #howto is hidden via Tailwind's `hidden` class (specificity 0,1,0).
           #howto:target has specificity 1,1,0 — wins, shows the overlay. */}
-      <style>{`#howto:target { display: flex !important; }`}</style>
+      <style>{`#howto:target { display: flex !important; } #contributions:target { display: flex !important; }`}</style>
 
       <div
         id="howto"
@@ -274,6 +288,80 @@ export default async function LandingPage({
           href="#_"
           className="absolute inset-0 z-0"
           aria-label="Close how to play"
+        />
+      </div>
+
+      {/* Contributions overlay — same :target pattern as #howto */}
+      <div
+        id="contributions"
+        className="hidden fixed inset-0 z-50 items-center justify-center p-6"
+        style={{ background: "rgba(10,8,6,0.8)" }}
+      >
+        <div
+          className="relative z-10 w-full rounded-[10px] px-7 py-7"
+          style={{
+            maxWidth: "440px",
+            background: "var(--bg-elev)",
+            boxShadow:
+              "inset 0 0 0 1px var(--border), 0 30px 80px rgba(0,0,0,0.6)",
+          }}
+          role="dialog"
+          aria-modal="true"
+        >
+          <EscapeClose activeHash="contributions" closeTo="#_" />
+          <div className="mb-5 flex items-center justify-between">
+            <span
+              className="text-fg-muted"
+              style={{ fontSize: "11px", letterSpacing: "0.25em" }}
+            >
+              CONTRIBUTIONS
+            </span>
+            <a
+              href="#_"
+              className="text-fg-muted hover:text-fg px-1 text-sm"
+              style={{ textDecoration: "none" }}
+            >
+              esc ✕
+            </a>
+          </div>
+          <div className="flex flex-col gap-4 text-sm leading-relaxed text-fg">
+            <p>
+              If you like the puzzles but think they could be improved and
+              you&apos;re good with Python, please visit the open source repo
+              for the puzzle generator:
+            </p>
+            <a
+              href="https://github.com/egeyesss/csp-generator"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: "var(--accent-amber)",
+                textDecoration: "none",
+                letterSpacing: "0.02em",
+              }}
+            >
+              github.com/egeyesss/csp-generator ↗
+            </a>
+            <p>
+              Even if you have zero coding experience, reach out for any
+              concerns or suggestions:
+            </p>
+            <a
+              href="mailto:egeyesilyurtca@gmail.com"
+              style={{
+                color: "var(--accent-amber)",
+                textDecoration: "none",
+                letterSpacing: "0.02em",
+              }}
+            >
+              egeyesilyurtca@gmail.com
+            </a>
+          </div>
+        </div>
+        <a
+          href="#_"
+          className="absolute inset-0 z-0"
+          aria-label="Close contributions"
         />
       </div>
     </>
