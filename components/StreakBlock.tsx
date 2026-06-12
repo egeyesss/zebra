@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 
-import { dayBefore, PENDING_RESULT_KEY, STREAK_STORAGE_KEY, useStreak } from "@/lib/storage/streak";
+import { dayBefore, effectiveCurrent, PENDING_RESULT_KEY, STREAK_STORAGE_KEY, useStreak } from "@/lib/storage/streak";
 import { resetZoneDate } from "@/lib/data/selection";
 import type { StreakState } from "@/types/streak";
 
@@ -95,13 +95,13 @@ export function StreakBlock({ compact = false }: { compact?: boolean }) {
   }, [status]);
 
   const streak = serverStreak ?? localStreak;
-  const { current, lastPlayedDate } = streak;
+  const { lastPlayedDate } = streak;
+  const today = resetZoneDate();
+  const current = effectiveCurrent(streak, today);
   const hasStreak = current > 0;
   const isSignedIn = status === "authenticated";
 
   // True when the user has an active streak but hasn't played today yet.
-  // We compare lastPlayedDate against yesterday's date in Toronto time.
-  const today = resetZoneDate();
   const playedYesterday = hasStreak && lastPlayedDate === dayBefore(today) && lastPlayedDate !== today;
 
   // Format "2026-06-09" → "Jun 9"

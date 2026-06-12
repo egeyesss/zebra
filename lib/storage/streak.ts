@@ -108,6 +108,24 @@ export function recordResult(result: PuzzleResult): void {
   window.dispatchEvent(new StorageEvent("storage", { key: STREAK_STORAGE_KEY }));
 }
 
+/**
+ * Returns the streak count that should actually be displayed.
+ *
+ * A streak is only alive if the last solve was today or yesterday (Toronto
+ * time). If the player missed the window — e.g. solved June 10 and it's now
+ * June 12 without having solved June 11 — the streak is expired and we show 0
+ * so they aren't misled by a stale number sitting in storage.
+ *
+ * Storage is not mutated here; recordResult() handles the actual reset when
+ * the player solves again.
+ */
+export function effectiveCurrent(state: StreakState, today: string): number {
+  if (state.current === 0 || state.lastPlayedDate === null) return 0;
+  const alive =
+    state.lastPlayedDate === today || state.lastPlayedDate === dayBefore(today);
+  return alive ? state.current : 0;
+}
+
 /** Returns the persisted streak state. Use recordResult() to update it. */
 export function useStreak(): StreakState {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);

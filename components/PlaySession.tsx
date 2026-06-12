@@ -16,7 +16,7 @@ import { ResultScreen } from "./ResultScreen";
 import { TrackBadge } from "./TrackBadge";
 import { Wordmark } from "./Wordmark";
 import { useSession } from "next-auth/react";
-import { PENDING_RESULT_KEY, recordResult, useStreak } from "@/lib/storage/streak";
+import { effectiveCurrent, PENDING_RESULT_KEY, recordResult, useStreak } from "@/lib/storage/streak";
 import { loadSession, saveSession, type PuzzleSession } from "@/lib/storage/session";
 import { resetZoneDate } from "@/lib/data/selection";
 
@@ -544,7 +544,7 @@ export function PlaySession({ puzzle, isPreview, number, track, serverSession }:
               className="text-fg-muted tabular-nums"
               style={{ fontSize: "11px", letterSpacing: "0.04em" }}
             >
-              🔥 {streak.current} day streak
+              🔥 {effectiveCurrent(streak, resetZoneDate())} day streak
             </span>
             <a
               href="#zebra-about"

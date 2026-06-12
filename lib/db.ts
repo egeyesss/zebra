@@ -22,7 +22,9 @@ function rowToState(row: Record<string, unknown> | undefined): StreakState {
   return {
     current: Number(row.current ?? 0),
     longest: Number(row.longest ?? 0),
-    lastPlayedDate: row.last_played ? String(row.last_played) : null,
+    // last_played is a TIMESTAMPTZ in Postgres; slice to YYYY-MM-DD so it
+    // compares correctly against the date strings used everywhere else.
+    lastPlayedDate: row.last_played ? String(row.last_played).slice(0, 10) : null,
   };
 }
 
