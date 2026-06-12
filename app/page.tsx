@@ -187,31 +187,17 @@ export default async function LandingPage({
           className="flex flex-col items-center gap-2"
           style={{ fontSize: "13px" }}
         >
-          <div className="flex items-center gap-4">
-            <a
-              href="/about"
-              style={{
-                color: "var(--fg-muted)",
-                textDecoration: "none",
-                letterSpacing: "0.15em",
-                opacity: 0.6,
-              }}
-            >
-              about
-            </a>
-            <a
-              href="#contributions"
-              className="hidden lg:inline"
-              style={{
-                color: "var(--fg-muted)",
-                textDecoration: "none",
-                letterSpacing: "0.15em",
-                opacity: 0.6,
-              }}
-            >
-              contributions
-            </a>
-          </div>
+          <a
+            href="/about"
+            style={{
+              color: "var(--fg-muted)",
+              textDecoration: "none",
+              letterSpacing: "0.15em",
+              opacity: 0.6,
+            }}
+          >
+            about
+          </a>
           <div
             className="text-center text-fg-muted"
             style={{ letterSpacing: "0.2em", opacity: 0.45 }}

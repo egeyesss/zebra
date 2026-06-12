@@ -150,6 +150,28 @@ export function ModeSelector({
           </a>
         )}
       </div>
+
+      {/* Contributions — desktop only, sits below the main action row */}
+      <div className="hidden lg:flex justify-center" style={{ marginTop: "10px" }}>
+        <a
+          href="#contributions"
+          className="rounded-full transition-colors"
+          style={{
+            fontFamily: "inherit",
+            fontSize: "13px",
+            letterSpacing: "0.08em",
+            padding: "7px 22px",
+            color: "var(--accent-amber)",
+            textDecoration: "none",
+            boxShadow: "inset 0 0 0 1px var(--accent-amber)",
+            background: "rgba(212,160,64,0.06)",
+            display: "inline-flex",
+            alignItems: "center",
+          }}
+        >
+          contributions
+        </a>
+      </div>
     </>
   );
 }
