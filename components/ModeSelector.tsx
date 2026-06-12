@@ -93,23 +93,20 @@ export function ModeSelector({
         className="mx-4 flex flex-col items-center"
         style={{ gap: "10px", marginTop: "clamp(8px, 1.5dvh, 20px)" }}
       >
-        {/* How to play + play/Fridays only — always on one line, split width equally */}
-        <div className="flex w-full" style={{ gap: "14px" }}>
+        <div className="flex flex-wrap justify-center" style={{ gap: "14px" }}>
           <a
             href="#howto"
             className="btn-ghost rounded-full text-fg transition-colors"
             style={{
-              flex: 1,
               fontFamily: "inherit",
-              fontSize: "clamp(13px, 3.8vw, 16px)",
+              fontSize: "16px",
               letterSpacing: "0.02em",
-              padding: "clamp(10px, 1.5dvh, 16px) 12px",
+              padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
               background: "transparent",
               textDecoration: "none",
               boxShadow: "inset 0 0 0 1px var(--border)",
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
-              justifyContent: "center",
             }}
           >
             how to play
@@ -117,22 +114,20 @@ export function ModeSelector({
           {deepUnavailable ? (
             <span
               style={{
-                flex: 1,
                 fontFamily: "inherit",
-                fontSize: "clamp(13px, 3.8vw, 16px)",
+                fontSize: "16px",
                 letterSpacing: "0.02em",
-                padding: "clamp(10px, 1.5dvh, 16px) 12px",
+                padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
                 color: "var(--fg-muted)",
                 boxShadow: "inset 0 0 0 1.5px var(--border)",
-                opacity: 0.4,
+                opacity: 0.35,
                 borderRadius: "9999px",
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
-                justifyContent: "center",
                 cursor: "default",
               }}
             >
-              Fridays only
+              play
             </span>
           ) : (
             <a
@@ -140,18 +135,16 @@ export function ModeSelector({
               onClick={() => track("play_click", { mode })}
               className="btn-play rounded-full transition-colors"
               style={{
-                flex: 1,
                 fontFamily: "inherit",
-                fontSize: "clamp(13px, 3.8vw, 16px)",
+                fontSize: "16px",
                 letterSpacing: "0.02em",
-                padding: "clamp(10px, 1.5dvh, 16px) 12px",
+                padding: "clamp(10px, 1.5dvh, 16px) clamp(28px, 4vw, 40px)",
                 color: "var(--accent-green)",
                 boxShadow: "inset 0 0 0 1.5px var(--accent-green)",
                 background: "rgba(109,191,109,0.08)",
                 textDecoration: "none",
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
-                justifyContent: "center",
               }}
             >
               play
