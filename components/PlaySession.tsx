@@ -17,7 +17,7 @@ import { TrackBadge } from "./TrackBadge";
 import { Wordmark } from "./Wordmark";
 import { useSession } from "next-auth/react";
 import { PENDING_RESULT_KEY, recordResult, useStreak } from "@/lib/storage/streak";
-import { loadSession, saveSession } from "@/lib/storage/session";
+import { loadSession, saveSession, type PuzzleSession } from "@/lib/storage/session";
 import { resetZoneDate } from "@/lib/data/selection";
 
 interface Props {
@@ -25,6 +25,7 @@ interface Props {
   isPreview: boolean;
   number: number | null;
   track: Track;
+  serverSession?: PuzzleSession | null;
 }
 
 function formatTime(s: number): string {
@@ -60,10 +61,13 @@ function checkSolved(
   );
 }
 
-export function PlaySession({ puzzle, isPreview, number, track }: Props) {
+export function PlaySession({ puzzle, isPreview, number, track, serverSession }: Props) {
   // Each lazy initializer below calls this helper once on mount.
-  // loadSession is a tiny JSON.parse (< 1 ms) so calling it per-useState is fine.
-  function initSession() { return isPreview ? null : loadSession(puzzle.id, resetZoneDate()); }
+  // localStorage wins (same-device progress); serverSession is the cross-device fallback.
+  function initSession() {
+    if (isPreview) return null;
+    return loadSession(puzzle.id, resetZoneDate()) ?? serverSession ?? null;
+  }
 
   const [started, setStarted] = useState(() => {
     const s = initSession();
@@ -220,11 +224,10 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
   function handleFinish(elapsedSeconds: number) {
     setFinalTime(elapsedSeconds);
     setCheckMode(false);
-    // Persist the completed session so a refresh after solve restores the result.
     if (!isPreview) {
       const today = resetZoneDate();
-      saveSession({
-        v: 1,
+      const finalSession = {
+        v: 1 as const,
         puzzleId: puzzle.id,
         date: today,
         elapsedSeconds,
@@ -237,7 +240,16 @@ export function PlaySession({ puzzle, isPreview, number, track }: Props) {
         checkedCell,
         solved: true,
         finalTime: elapsedSeconds,
-      });
+      };
+      saveSession(finalSession);
+      // Sync to server so other devices can restore the completed grid.
+      if (session) {
+        fetch("/api/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(finalSession),
+        }).catch(() => {});
+      }
     }
     // Small delay so the player sees their last commit flash before the overlay appears.
     setTimeout(() => setShowResult(true), 600);

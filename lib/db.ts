@@ -1,6 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 
 import type { PuzzleResult, StreakState } from "@/types/streak";
+import type { PuzzleSession } from "@/lib/storage/session";
 
 function sql() {
   const url = process.env.DATABASE_URL;
@@ -76,6 +77,37 @@ export async function recordServerResult(
   `;
 
   return next;
+}
+
+export async function getServerPuzzleSession(
+  userId: string,
+  puzzleId: string,
+): Promise<PuzzleSession | null> {
+  const db = sql();
+  try {
+    const rows = await db`
+      SELECT session FROM puzzle_sessions
+      WHERE user_id = ${userId} AND puzzle_id = ${puzzleId}
+    `;
+    if (!rows[0]) return null;
+    return rows[0].session as PuzzleSession;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveServerPuzzleSession(
+  userId: string,
+  session: PuzzleSession,
+): Promise<void> {
+  const db = sql();
+  await db`
+    INSERT INTO puzzle_sessions (user_id, puzzle_id, session)
+    VALUES (${userId}, ${session.puzzleId}, ${JSON.stringify(session)})
+    ON CONFLICT (user_id, puzzle_id) DO UPDATE SET
+      session    = EXCLUDED.session,
+      updated_at = NOW()
+  `;
 }
 
 /**
