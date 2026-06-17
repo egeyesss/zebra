@@ -1,8 +1,14 @@
 import { auth } from "@/auth";
 import { getServerPuzzleSession, saveServerPuzzleSession } from "@/lib/db";
 import { resetZoneDate } from "@/lib/data/selection";
+import { getPuzzleById } from "@/lib/data/puzzles";
 import { rateLimit, tooManyRequests } from "@/lib/rate-limit";
 import type { PuzzleSession } from "@/lib/storage/session";
+
+// A solved/in-progress session for the largest (5×5) grid is a few hundred
+// bytes. Cap the persisted payload well above that but low enough that a signed
+// -in client can't write multi-megabyte blobs into Postgres.
+const MAX_SESSION_BYTES = 8 * 1024;
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -57,6 +63,18 @@ export async function POST(request: Request) {
 
   if (s.date !== resetZoneDate()) {
     return Response.json({ error: "invalid_date" }, { status: 400 });
+  }
+
+  // Only persist sessions for puzzles we actually ship — otherwise a client can
+  // seed the table with rows under arbitrary puzzle_ids.
+  if (!getPuzzleById(s.puzzleId)) {
+    return Response.json({ error: "unknown_puzzle" }, { status: 400 });
+  }
+
+  // Bound the stored payload. The unbounded `committed`/`notes`/`overwrittenCells`
+  // fields would otherwise let a signed-in client write arbitrarily large blobs.
+  if (Buffer.byteLength(JSON.stringify(s)) > MAX_SESSION_BYTES) {
+    return Response.json({ error: "session_too_large" }, { status: 413 });
   }
 
   try {
