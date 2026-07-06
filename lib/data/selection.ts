@@ -4,14 +4,13 @@
  * The day's puzzle is a deterministic function of the date, not a random draw:
  * everyone gets the same puzzle on the same Toronto day, which is what makes the
  * shared "Zebra #042" number meaningful. The pool is consumed sequentially —
- * day N takes index N — so puzzles never repeat as long as the bank stays ahead
- * of the cursor. A puzzle "behind" today's index is simply spent and never
- * reappears; that's the no-duplicates guarantee, no separate "used" store
- * needed for v1.
+ * day N takes index N — so puzzles don't repeat as long as the bank stays ahead
+ * of the cursor.
  *
- * When the cursor runs past the end of the pool the bank is exhausted and we
- * return null rather than wrapping (wrapping would replay old puzzles). Keeping
- * the bank topped up is an operational task, not a code path.
+ * When the cursor runs past the end of the pool we wrap around and replay the
+ * bank from the start. Repeats aren't ideal, but they beat the site going dark
+ * when nobody is around to top up the bank; dropping a bigger bundle into
+ * data/puzzles/ later pushes the wrap point out with no code change.
  */
 
 import { LAUNCH_DATE, RESET_TIMEZONE } from "@/lib/config";
@@ -69,18 +68,19 @@ export function isFridayInToronto(at: Date = new Date()): boolean {
 }
 
 /**
- * The puzzle scheduled for the given instant, or null if none is (before launch,
- * or after the bank is exhausted).
+ * The puzzle scheduled for the given instant, or null before launch or when the
+ * pool is empty. Once the bank is exhausted the pool wraps and replays from the
+ * start, so a non-empty pool always yields a puzzle after launch.
  */
 export function selectDailyPuzzle(
   pool: ExportedPuzzle[],
   at: Date = new Date(),
 ): ExportedPuzzle | null {
   const index = dayIndex(at);
-  if (index < 0 || index >= pool.length) {
+  if (index < 0 || pool.length === 0) {
     return null;
   }
-  return pool[index];
+  return pool[index % pool.length];
 }
 
 /** Day of week (0=Sun…6=Sat) for LAUNCH_DATE in the reset timezone. */
@@ -122,14 +122,15 @@ export function deepPuzzleNumber(at: Date = new Date()): number | null {
 }
 
 /**
- * The Deep puzzle scheduled for the given Friday, or null if none is
- * (not a Friday, before launch, or the Deep bank is exhausted).
+ * The Deep puzzle scheduled for the given Friday, or null when it's not a
+ * Friday, before launch, or the pool is empty. Like the daily pool, an
+ * exhausted Deep bank wraps and replays from the start.
  */
 export function selectDeepPuzzle(
   pool: ExportedPuzzle[],
   at: Date = new Date(),
 ): ExportedPuzzle | null {
   const index = deepPuzzleIndex(at);
-  if (index < 0 || index >= pool.length) return null;
-  return pool[index];
+  if (index < 0 || pool.length === 0) return null;
+  return pool[index % pool.length];
 }

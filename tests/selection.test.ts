@@ -64,9 +64,19 @@ describe("selectDailyPuzzle", () => {
     ).toBeNull();
   });
 
-  it("returns null once the bank is exhausted (never wraps / repeats)", () => {
+  it("wraps back to the start once the bank is exhausted", () => {
+    // Day 3 with a 3-puzzle pool → replay p0, day 5 → p2.
     expect(
-      selectDailyPuzzle(fakePool, new Date("2026-06-14T12:00:00Z")),
+      selectDailyPuzzle(fakePool, new Date("2026-06-14T12:00:00Z"))?.id,
+    ).toBe("p0");
+    expect(
+      selectDailyPuzzle(fakePool, new Date("2026-06-16T12:00:00Z"))?.id,
+    ).toBe("p2");
+  });
+
+  it("returns null for an empty pool", () => {
+    expect(
+      selectDailyPuzzle([], new Date("2026-06-14T12:00:00Z")),
     ).toBeNull();
   });
 });
@@ -123,7 +133,12 @@ describe("selectDeepPuzzle", () => {
     expect(selectDeepPuzzle(fakePool, new Date("2026-06-11T12:00:00Z"))).toBeNull();
   });
 
-  it("returns null once the Deep bank is exhausted", () => {
-    expect(selectDeepPuzzle(fakePool, new Date("2026-07-03T12:00:00Z"))).toBeNull();
+  it("wraps back to the start once the Deep bank is exhausted", () => {
+    // 4th Friday with a 3-puzzle pool → replay p0.
+    expect(selectDeepPuzzle(fakePool, new Date("2026-07-03T12:00:00Z"))?.id).toBe("p0");
+  });
+
+  it("returns null for an empty pool", () => {
+    expect(selectDeepPuzzle([], new Date("2026-07-03T12:00:00Z"))).toBeNull();
   });
 });
